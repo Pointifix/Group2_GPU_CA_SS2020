@@ -8,14 +8,14 @@
   * @param destinations Destinations
   * @param weights Weights
   */
-Graph::Graph(std::vector<int> edges, std::vector<int> destinations, std::vector<int> weights)
-        : edges(std::move(edges)), destinations(std::move(destinations)), weights(std::move(weights))
+Graph::Graph(std::vector<int> edges, std::vector<int> destinations, std::vector<int> weights) :
+    edges(std::move(edges)), destinations(std::move(destinations)), weights(std::move(weights))
 {
 }
 
 Path::Path(std::vector<int> edges, std::vector<int> destinations, std::vector<int> weights,
-        int source_node, int destination_node)
-            : Graph(std::move(edges), std::move(destinations), std::move(weights)),
-            source_node(source_node), destination_node(destination_node)
+        int source_node, int destination_node) :
+        Graph(std::move(edges), std::move(destinations), std::move(weights)),
+        source_node(source_node), destination_node(destination_node)
 {
 }
