@@ -37,7 +37,7 @@ __global__ void initKernel(int *a)
 
 int main()
 {
-    const int arraySize = 200'000'000;
+    const int arraySize = 200000000;
 	int* a = new int[arraySize];
 	int* b = new int[arraySize];
 	int* c = new int[arraySize];
