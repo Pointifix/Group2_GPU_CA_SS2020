@@ -22,10 +22,7 @@ public:
      * @param destination_node Destination Node (index)
      */
     Path(std::vector<int> edges, std::vector<int> destinations,
-            std::vector<int> weights, int source_node, int destination_node)
-            : Graph(std::move(edges), std::move(destinations), std::move(weights)),
-            source_node(source_node), destination_node(destination_node)
-    { }
+            std::vector<int> weights, int source_node, int destination_node);
     int source_node;
     int destination_node;
 };

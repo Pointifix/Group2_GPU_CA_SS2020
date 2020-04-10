@@ -1,4 +1,5 @@
 #pragma once
+
 #include "sssp.h"
 
 class SSSP_Pinned_Memory : public SSSP {

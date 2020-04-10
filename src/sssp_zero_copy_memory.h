@@ -1,4 +1,5 @@
 #pragma once
+
 #include "sssp.h"
 
 class SSSP_Zero_Copy_Memory : public SSSP {
