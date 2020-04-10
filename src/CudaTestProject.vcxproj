@@ -10,6 +10,28 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="main.cu" />
+    <CudaCompile Include="sssp_pinned_memory.cu" />
+    <CudaCompile Include="sssp_standard.cu" />
+    <CudaCompile Include="sssp_thrust.cu" />
+    <CudaCompile Include="sssp_zero_copy_memory.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="graph.cpp" />
+    <ClCompile Include="sssp_sequential.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="graph.h" />
+    <ClInclude Include="graph_generator.h" />
+    <ClInclude Include="graph_io.h" />
+    <ClInclude Include="sssp.h" />
+    <ClInclude Include="sssp_pinned_memory.h" />
+    <ClInclude Include="sssp_sequential.h" />
+    <ClInclude Include="sssp_standard.h" />
+    <ClInclude Include="sssp_thrust.h" />
+    <ClInclude Include="sssp_zero_copy_memory.h" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A750FF9B-9552-4907-B66B-4FF7E6A8452F}</ProjectGuid>
     <RootNamespace>CudaTestProject</RootNamespace>
@@ -77,9 +99,6 @@
       <TargetMachinePlatform>64</TargetMachinePlatform>
     </CudaCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <CudaCompile Include="kernel.cu" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="$(VCTargetsPath)\BuildCustomizations\CUDA 10.1.targets" />
