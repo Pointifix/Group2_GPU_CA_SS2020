@@ -1,14 +1,31 @@
-//
-// Created by thors on 10/04/2020.
-//
+#pragma once
 
-#ifndef GROUP2_GPU_CA_SS2020_GRAPH_H
-#define GROUP2_GPU_CA_SS2020_GRAPH_H
+#include <utility>
+#include <vector>
 
-
-class graph {
-
+class Graph {
+public:
+    Graph(std::vector<int> edges, std::vector<int> destinations, std::vector<int> weights);
+    std::vector<int> edges;
+    std::vector<int> destinations;
+    std::vector<int> weights;
 };
 
-
-#endif //GROUP2_GPU_CA_SS2020_GRAPH_H
+class Path : public Graph {
+public:
+    /**
+     * Creates a Path instance.
+     * @param edges Edges
+     * @param destinations Destinations
+     * @param weights Weights
+     * @param source_node Source Node (index)
+     * @param destination_node Destination Node (index)
+     */
+    Path(std::vector<int> edges, std::vector<int> destinations,
+            std::vector<int> weights, int source_node, int destination_node)
+            : Graph(std::move(edges), std::move(destinations), std::move(weights)),
+            source_node(source_node), destination_node(destination_node)
+    { }
+    int source_node;
+    int destination_node;
+};

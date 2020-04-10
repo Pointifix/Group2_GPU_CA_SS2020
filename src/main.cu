@@ -6,6 +6,11 @@
 #include <iostream>
 #include <chrono>
 
+#include "graph.h"
+#include "graph_generator.h"
+#include "graph_io.h"
+#include "sssp.h"
+
 using namespace std;
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, int size);
