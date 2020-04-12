@@ -5,7 +5,7 @@
 
 class Graph {
 public:
-    Graph(std::vector<int> edges, std::vector<int> destinations, std::vector<int> weights);
+    Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights);
     std::vector<int> edges;
     std::vector<int> destinations;
     std::vector<int> weights;
@@ -21,8 +21,8 @@ public:
      * @param source_node Source Node (index)
      * @param destination_node Destination Node (index)
      */
-    Path(std::vector<int> edges, std::vector<int> destinations,
-            std::vector<int> weights, int source_node, int destination_node);
+    Path(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights,
+            int source_node, int destination_node);
     int source_node;
     int destination_node;
 };
