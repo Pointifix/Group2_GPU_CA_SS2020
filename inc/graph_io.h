@@ -1,7 +1,7 @@
 #pragma once
 
-#include <memory>
-#include <string>
+#include <c++/4.9/memory>
+#include <c++/4.9/string>
 
 #include "graph.h"
 

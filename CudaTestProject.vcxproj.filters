@@ -1,0 +1,65 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Headers">
+      <UniqueIdentifier>{c0c55853-11bc-4bd1-b83d-f08fcc22f13c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source">
+      <UniqueIdentifier>{889b37e0-48dd-4cef-908e-dc2cdca25fd9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\graph.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="src\sssp_sequential.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="src\main.cu">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="src\sssp_pinned_memory.cu">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="src\sssp_standard.cu">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="src\sssp_thrust.cu">
+      <Filter>Source</Filter>
+    </None>
+    <None Include="src\sssp_zero_copy_memory.cu">
+      <Filter>Source</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\graph.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\graph_generator.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\graph_io.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp_pinned_memory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp_sequential.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp_standard.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp_thrust.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+    <ClInclude Include="inc\sssp_zero_copy_memory.h">
+      <Filter>Headers</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

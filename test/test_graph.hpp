@@ -2,7 +2,7 @@
 
 #include "catch.hpp"
 
-#include "../src/graph_generator.h"
+#include "graph_generator.h"
 
 float calculateDensity(int e, int v, bool directed) {
     return (float)(directed ? 1 : 2) * (float)e / ((float)v * ((float)v - 1));

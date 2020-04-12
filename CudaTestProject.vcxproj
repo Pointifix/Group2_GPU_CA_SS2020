@@ -18,19 +18,26 @@
     <CudaCompile Include="sssp_zero_copy_memory.cu" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="graph.cpp" />
-    <ClCompile Include="sssp_sequential.cpp" />
+    <ClCompile Include="src\graph.cpp" />
+    <ClCompile Include="src\sssp_sequential.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="graph.h" />
-    <ClInclude Include="graph_generator.h" />
-    <ClInclude Include="graph_io.h" />
-    <ClInclude Include="sssp.h" />
-    <ClInclude Include="sssp_pinned_memory.h" />
-    <ClInclude Include="sssp_sequential.h" />
-    <ClInclude Include="sssp_standard.h" />
-    <ClInclude Include="sssp_thrust.h" />
-    <ClInclude Include="sssp_zero_copy_memory.h" />
+    <None Include="src\main.cu" />
+    <None Include="src\sssp_pinned_memory.cu" />
+    <None Include="src\sssp_standard.cu" />
+    <None Include="src\sssp_thrust.cu" />
+    <None Include="src\sssp_zero_copy_memory.cu" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="inc\graph.h" />
+    <ClInclude Include="inc\graph_generator.h" />
+    <ClInclude Include="inc\graph_io.h" />
+    <ClInclude Include="inc\sssp.h" />
+    <ClInclude Include="inc\sssp_pinned_memory.h" />
+    <ClInclude Include="inc\sssp_sequential.h" />
+    <ClInclude Include="inc\sssp_standard.h" />
+    <ClInclude Include="inc\sssp_thrust.h" />
+    <ClInclude Include="inc\sssp_zero_copy_memory.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A750FF9B-9552-4907-B66B-4FF7E6A8452F}</ProjectGuid>
