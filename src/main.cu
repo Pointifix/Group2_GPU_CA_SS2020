@@ -41,6 +41,33 @@ __global__ void initKernel(int *a)
 
 int main()
 {
+	std::shared_ptr<Graph> graph = generateConnectedGraph(4, 0.5);
+
+	std::cout << "Edges: " << std::endl;
+	for (auto && value : graph->edges)
+	{
+		std::cout << value << ", ";
+	}
+	std::cout << std::endl;
+
+	std::cout << "Destinations: " << std::endl;
+	for (auto && value : graph->destinations)
+	{
+		std::cout << value << ", ";
+	}
+	std::cout << std::endl;
+
+	std::cout << "Weights: " << std::endl;
+	for (auto && value : graph->weights)
+	{
+		std::cout << value << ", ";
+	}
+	std::cout << std::endl;
+
+	system("pause");
+
+	// old test code;
+	/*
     const int arraySize = 200000000;
 	int* a = new int[arraySize];
 	int* b = new int[arraySize];
@@ -88,6 +115,7 @@ int main()
     cudaStatus = cudaDeviceReset();
 
     return cudaStatus;
+	*/
 }
 
 cudaError_t addWithCuda(int *c, const int *a, const int *b, int size)
