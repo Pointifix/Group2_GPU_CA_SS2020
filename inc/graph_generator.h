@@ -8,7 +8,7 @@
 /**
  * Generates a connected Graph with given number of nodes and density.
  * @param num_nodes Number of nodes
- * @param density Density in the range [0,1], minimum Density for the graph to be connect Emin = 1 / |V|
+ * @param density Density in the range [0,1], minimum Density for the graph to be connected: Emin = 1 / |V|
  * @param directed is always true (and this doesn't matter its ignored)
  * @param max_weight maximum weight value possible for edge weights
  * @return connected Graph (actually nullptr)
@@ -30,17 +30,22 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
     std::vector<int> directions(num_edges);
     std::vector<int> weights(num_edges);
 
+	// init random number generator, create building vectors
 	srand(time(NULL));
 	std::vector<int> connected_nodes;
 	std::vector<int> not_connected_nodes(num_nodes);
 	std::vector<std::vector<int>>directions_builder(num_nodes);
 
+	// init vector with all nodes
 	for (size_t i = 0; i < num_nodes; i++) not_connected_nodes.at(i) = i;
 
+	// pick a random node which is the start of the connected nodes set
 	int start_node = rand() % num_nodes;
 	connected_nodes.push_back(start_node);
 	not_connected_nodes.erase(not_connected_nodes.begin() + start_node);
 
+	// first, pick random non-connected nodes and connect them with connected nodes until all nodes are connected (weakly connected graph)
+	// when every node has at least one in or outgoing edge pick random edges until the density is satisfied
 	for (size_t i = 0; i < num_edges; i++)
 	{
 		int random_source = connected_nodes.at(rand() % connected_nodes.size());
@@ -75,7 +80,7 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
 		weights.at(i) = rand() % (max_weight + 1);
 	}
 
-	// copy random directions into directions vector
+	// copy random directions (vector of vectors) into directions vector and set the pointers of edge vector to the corresponding offsets
 	size_t i = 0;
 	size_t j = 0;
 	size_t k = 0;

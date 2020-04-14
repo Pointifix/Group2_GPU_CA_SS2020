@@ -1,6 +1,6 @@
 #pragma once
 
-#include <c++/4.9/memory>
+#include <memory>
 #include "graph.h"
 
 class SSSP {
