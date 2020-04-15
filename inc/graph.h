@@ -11,24 +11,7 @@ public:
     std::vector<int> destinations;
     std::vector<int> weights;
 
-    std::string to_string()
-    {
-        std::string builder = "Graph (" + std::to_string(edges.size()) + " vertices, " + std::to_string(destinations.size()) + " edges)";
-
-        builder += "\nE: ";
-        for (const auto &edge : edges) {
-            builder += std::to_string(edge) + ", ";
-        }
-        builder += "\nD: ";
-        for (const auto &destination : destinations) {
-            builder += std::to_string(destination) + ", ";
-        }
-        builder += "\nW: ";
-        for (const auto &weight : weights) {
-            builder += std::to_string(weight) + ", ";
-        }
-        return builder + "\n";
-    }
+    std::string to_string();
 };
 
 class Path : public Graph {
