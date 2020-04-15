@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
-#include <stdlib.h>
-#include <time.h>
+#include <cstdlib>
+#include <ctime>
 #include <algorithm>
 
 #include "graph.h"
@@ -14,7 +14,8 @@
  * @param max_weight maximum weight value possible for edge weights
  * @return connected Graph
  */
-std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool directed = true, int max_weight = 10)
+std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density,
+        bool directed = true, int max_weight = 10, unsigned int seed = time(nullptr))
 {
     if (num_nodes < 0 || density < 0 || density > 1) {
         return nullptr;
@@ -32,13 +33,15 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
     std::vector<int> weights(num_edges);
 
 	// init random number generator, create building vectors
-	srand(time(NULL));
+	srand(seed);
 	std::vector<int> connected_nodes;
 	std::vector<int> not_connected_nodes(num_nodes);
 	std::vector<std::vector<int>>directions_builder(num_nodes);
 
 	// init vector with all nodes
-	for (size_t i = 0; i < num_nodes; i++) not_connected_nodes.at(i) = i;
+	for (int i = 0; i < num_nodes; i++) {
+	    not_connected_nodes.at(i) = i;
+	}
 
 	// pick a random node which is the start of the connected nodes set
 	int start_node = rand() % num_nodes;
@@ -47,7 +50,7 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
 
 	// first, pick random non-connected nodes and connect them with connected nodes until all nodes are connected (weakly connected graph)
 	// when every node has at least one in or outgoing edge pick random edges until the density is satisfied
-	for (size_t i = 0; i < num_edges; i++)
+	for (int i = 0; i < num_edges; i++)
 	{
 		int random_source = connected_nodes.at(rand() % connected_nodes.size());
 		int random_destination = rand() % num_nodes;
@@ -76,15 +79,15 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
 	}
 
 	// assign random weights
-	for (size_t i = 0; i < weights.size(); i++)
+	for (int i = 0; i < weights.size(); i++)
 	{
 		weights.at(i) = rand() % (max_weight + 1);
 	}
 
 	// copy random directions (vector of vectors) into directions vector and set the pointers of edge vector to the corresponding offsets
-	size_t i = 0;
-	size_t j = 0;
-	size_t k = 0;
+    int i = 0;
+    int j = 0;
+    int k = 0;
 	for (auto && node_directions : directions_builder) {
 		edges.at(k) = i;
 		std::sort(node_directions.begin(), node_directions.end());
