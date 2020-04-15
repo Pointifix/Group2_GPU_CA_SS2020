@@ -3,6 +3,7 @@
 #include <memory>
 #include <stdlib.h>
 #include <time.h>
+#include <algorithm>
 
 #include "graph.h"
 /**
@@ -11,7 +12,7 @@
  * @param density Density in the range [0,1], minimum Density for the graph to be connected: Emin = 1 / |V|
  * @param directed is always true (and this doesn't matter its ignored)
  * @param max_weight maximum weight value possible for edge weights
- * @return connected Graph (actually nullptr)
+ * @return connected Graph
  */
 std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool directed = true, int max_weight = 10)
 {
@@ -86,11 +87,14 @@ std::shared_ptr<Graph> generateConnectedGraph(int num_nodes, float density, bool
 	size_t k = 0;
 	for (auto && node_directions : directions_builder) {
 		edges.at(k) = i;
+		std::sort(node_directions.begin(), node_directions.end());
+
 		for (auto && direction : node_directions)
 		{
 			directions.at(i + j) = node_directions.at(j);
 			j++;
 		}
+
 		j = 0;
 		i += node_directions.size();
 		k++;

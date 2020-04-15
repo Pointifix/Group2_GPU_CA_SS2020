@@ -38,33 +38,17 @@ __global__ void initKernel(int *a)
 	a[i] = i + 1;
 }
 
-
 int main()
 {
-	std::shared_ptr<Graph> graph = generateConnectedGraph(4, 0.5);
+	std::shared_ptr<Graph> graph = generateConnectedGraph(3, 0.7);
 
-	std::cout << "Edges: " << std::endl;
-	for (auto && value : graph->edges)
-	{
-		std::cout << value << ", ";
-	}
-	std::cout << std::endl;
+	std::cout << graph->to_string();
 
-	std::cout << "Destinations: " << std::endl;
-	for (auto && value : graph->destinations)
-	{
-		std::cout << value << ", ";
-	}
-	std::cout << std::endl;
+	writeGraph("graph.txt", graph);
 
-	std::cout << "Weights: " << std::endl;
-	for (auto && value : graph->weights)
-	{
-		std::cout << value << ", ";
-	}
-	std::cout << std::endl;
+    std::shared_ptr<Graph> graph2 = readGraph("graph.txt");
 
-	system("pause");
+    std::cout << graph2->to_string();
 
 	// old test code;
 	/*
