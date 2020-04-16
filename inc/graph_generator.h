@@ -77,7 +77,7 @@ namespace graphgen {
 
             if (std::find(directions_builder.at(random_source).begin(), directions_builder.at(random_source).end(),
                           random_destination) != directions_builder.at(random_source).end())
-                i--; // TODO fix! Infinite loop here with parameters num_nodes=3 and density=0.5
+                i--; // TODO fix! (Seemingly) Infinite loop here with parameters num_nodes=3 and density=0.5
             else directions_builder.at(random_source).push_back(random_destination);
         }
 
