@@ -87,6 +87,24 @@ namespace graphio {
                         weights.at(current_edge_count) = weight;
                     } else return nullptr;
 
+                if (source == current_node && target > current_target)
+                {
+                    destinations.at(current_edge_count) = target;
+                    weights.at(current_edge_count) = weight;
+                }
+                else if (source > current_node)
+                {
+                    for (size_t i = current_node + 1; i < source; i++)
+                    {
+                        edges.at(i) = current_edge_count;
+                    }
+
+                    current_node = source;
+                    edges.at(current_node) = current_edge_count;
+                    destinations.at(current_edge_count) = target;
+                    weights.at(current_edge_count) = weight;
+                }
+                else return nullptr;
                     current_target = target;
                     current_edge_count++;
                 } else return nullptr;
@@ -97,6 +115,15 @@ namespace graphio {
 
             return std::make_shared<Graph>(edges, destinations, weights);
         }
+
+        current_node++;
+        while (current_node < edges.size())
+        {
+            edges.at(current_node) = current_edge_count;
+            current_node++;
+        }
+
+        file.close();
 
         return nullptr;
     }

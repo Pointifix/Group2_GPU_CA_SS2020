@@ -40,13 +40,15 @@ __global__ void initKernel(int *a)
 
 int main()
 {
-	std::shared_ptr<Graph> graph = generateConnectedGraph(3, 0.7);
+	std::shared_ptr<Graph> graph = generateConnectedGraph(4, 0.2);
 
 	std::cout << graph->to_string();
 
 	writeGraph("graph.txt", graph);
 
     std::shared_ptr<Graph> graph2 = readGraph("graph.txt");
+
+    if (graph2 == nullptr) std::cout << "nullptr" << std::endl;
 
     std::cout << graph2->to_string();
 
