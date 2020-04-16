@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPH_GENERATOR_H
+#define GRAPH_GENERATOR_H
 
 #include <memory>
 #include <cstdlib>
@@ -107,3 +108,5 @@ namespace graphgen {
         return std::make_shared<Graph>(Graph(edges, directions, weights));
     }
 }
+
+#endif /* GRAPH_GENERATOR_H */

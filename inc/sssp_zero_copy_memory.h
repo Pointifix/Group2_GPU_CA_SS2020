@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSSP_Zero_Copy_Memory_H
+#define SSSP_Zero_Copy_Memory_H
 
 #include "sssp.h"
 
@@ -10,3 +11,5 @@ class SSSP_Zero_Copy_Memory : public SSSP {
     explicit SSSP_Zero_Copy_Memory(std::shared_ptr<Graph> graph);
     std::vector<std::shared_ptr<Path>> compute(int source_node) override;
 };
+
+#endif /* SSSP_Zero_Copy_Memory_H */

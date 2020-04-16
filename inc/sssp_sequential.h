@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSSP_Sequential_H
+#define SSSP_Sequential_H
 
 #include "sssp.h"
 
@@ -11,3 +12,5 @@ public:
     explicit SSSP_Sequential(std::shared_ptr<Graph> graph);
     std::vector<std::shared_ptr<Path>> compute(int source_node) override;
 };
+
+#endif /* SSSP_Sequential_H */

@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSP_Pinned_Memory_H
+#define SSP_Pinned_Memory_H
 
 #include "sssp.h"
 
@@ -11,3 +12,5 @@ public:
     explicit SSSP_Pinned_Memory(std::shared_ptr<Graph> graph);
     std::vector<std::shared_ptr<Path>> compute(int source_node) override;
 };
+
+#endif /* SSP_Pinned_Memory_H */

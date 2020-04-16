@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPH_IO_H
+#define GRAPH_IO_H
 
 #include <memory>
 #include <string>
@@ -129,3 +130,5 @@ namespace graphio
         return nullptr;
     }
 }
+
+#endif /* GRAPH_IO_H */

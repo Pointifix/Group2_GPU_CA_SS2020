@@ -1,7 +1,5 @@
 #include "graph.h"
 
-#include <utility>
-
  /**
   * Generates a graph instance.
   * @param edges Edges

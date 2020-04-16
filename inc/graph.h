@@ -1,4 +1,5 @@
-#pragma once
+#ifndef GRAPH_H
+#define GRAPH_H
 
 #include <utility>
 #include <vector>
@@ -29,3 +30,5 @@ public:
     int source_node;
     int destination_node;
 };
+
+#endif /* GRAPH_H */

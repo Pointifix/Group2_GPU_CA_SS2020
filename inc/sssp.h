@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SSSP_H_H
+#define SSSP_H_H
 
 #include <memory>
 #include "graph.h"
@@ -14,3 +15,5 @@ public:
 protected:
     std::shared_ptr<Graph> graph;
 };
+
+#endif /* SSSP_H */

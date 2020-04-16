@@ -8,10 +8,10 @@ include_directories(inc)
 
 set(ALL_SRCS # NO MAIN ALLOWED HERE!
     # graph
-        src/graph.cpp
+        src/graph.cu
     # sssp
         src/sssp_standard.cu
-        src/sssp_sequential.cpp
+        src/sssp_sequential.cu
         src/sssp_pinned_memory.cu
         src/sssp_zero_copy_memory.cu
         src/sssp_thrust.cu)
