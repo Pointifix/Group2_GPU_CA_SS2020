@@ -40,7 +40,7 @@ __global__ void initKernel(int *a)
 
 int main()
 {
-	std::shared_ptr<Graph> graph = generateConnectedGraph(4, 0.2);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(4, 0.2);
 
 	std::cout << graph->to_string();
 
