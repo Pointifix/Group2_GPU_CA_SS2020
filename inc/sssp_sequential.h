@@ -2,6 +2,7 @@
 #define SSSP_Sequential_H
 
 #include "sssp.h"
+#include <algorithm>
 
 class SSSP_Sequential : public SSSP {
 public:
