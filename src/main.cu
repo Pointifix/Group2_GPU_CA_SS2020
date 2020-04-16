@@ -44,9 +44,9 @@ int main()
 
 	std::cout << graph->to_string();
 
-	writeGraph("graph.txt", graph);
+	graphio::writeGraph("graph.txt", graph);
 
-    std::shared_ptr<Graph> graph2 = readGraph("graph.txt");
+    std::shared_ptr<Graph> graph2 = graphio::readGraph("graph.txt");
 
     if (graph2 == nullptr) std::cout << "nullptr" << std::endl;
 
