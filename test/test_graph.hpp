@@ -26,20 +26,10 @@ TEST_CASE("Graph Generator simple constraints") {
 TEST_CASE("Graph Generator simple graph") {
     std::shared_ptr<Graph> g;
 
-    g = generateConnectedGraph(0, 0);
-    CHECK(g->edges.empty());
-    CHECK(g->destinations.empty());
-    CHECK(g->weights.empty());
-
-    g = generateConnectedGraph(1, 0);
-    CHECK(g->edges.size() == 1);
-    CHECK(g->destinations.empty());
-    CHECK(g->weights.empty());
-
     g = generateConnectedGraph(1000, 0);
     CHECK(g->edges.size() == 1000);
-    CHECK(g->destinations.empty());
-    CHECK(g->weights.empty());
+    CHECK(g->destinations.size() == 1000 - 1);
+    CHECK(g->weights.size() == 1000 - 1);
 
     g = generateConnectedGraph(10, den(5, 10, true), true);
     CHECK(g->edges.size() == 10);
