@@ -11,7 +11,6 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
     std::vector<int> cost(N, std::numeric_limits<int>::max());
     cost[source_node] = 0;
     std::vector<int> used_edge(N, -1);
-    used_edge[source_node] = -2;
 
     // we initially add the source node and update the costs
     cluster.push_back(source_node);
@@ -87,7 +86,7 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
     std::cout << "Single Shortest Path" << std::endl;
     for(int i = 0; i < cluster.size(); i++)
     {
-        std::cout << cluster[i] << " with edge " << used_edge[i] << ", ";
+        std::cout << cluster[i] << " with edge " << used_edge[cluster[i]] << ", ";
     }
 
     return std::vector<std::shared_ptr<Path>>();
