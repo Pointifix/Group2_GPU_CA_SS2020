@@ -8,7 +8,7 @@
 
 int main()
 {
-	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(3, 0.5);
+	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(5, 0.2);
 	//std::cout << graph->to_string();
 	//graphio::writeGraph("graph.txt", graph);
 
@@ -16,7 +16,7 @@ int main()
     std::cout << graph2->to_string();
 
     SSSP_Sequential sequ(graph2);
-    sequ.compute(1);
+    sequ.compute(2);
 
 
 }

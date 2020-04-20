@@ -82,11 +82,24 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
         }
     } while(cluster.size() < graph->edges.size()); // while there is a vertex that is not reached yet
 
-
     std::cout << "Single Shortest Path" << std::endl;
     for(int i = 0; i < cluster.size(); i++)
     {
         std::cout << cluster[i] << " with edge " << used_edge[cluster[i]] << ", ";
+    }
+
+    std::vector<std::shared_ptr<Path>> shortest_paths;
+
+    std::vector<int> e(graph->edges.size(), 0);
+    std::vector<int> d;
+    std::vector<int> w;
+
+    int runner = 0;
+    for(int i = 1; i < cluster.size(); i++) // for each new node we can create a new path (source_node to destination_node)
+    {
+        std::shared_ptr<Path> p;
+        p->source_node = source_node;
+        p->destination_node = cluster[i];
     }
 
     return std::vector<std::shared_ptr<Path>>();
