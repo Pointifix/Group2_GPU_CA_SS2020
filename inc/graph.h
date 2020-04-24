@@ -12,7 +12,7 @@ public:
     std::vector<int> destinations;
     std::vector<int> weights;
 
-    std::string to_string();
+    std::string toString();
 };
 
 class Path : public Graph {

@@ -11,7 +11,7 @@ Graph::Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vecto
 {
 }
 
-std::string Graph::to_string() {
+std::string Graph::toString() {
     std::string builder = "Graph (" + std::to_string(edges.size()) + " vertices, " + std::to_string(destinations.size()) + " edges)";
 
     builder += "\nE: ";

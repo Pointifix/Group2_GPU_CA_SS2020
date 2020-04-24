@@ -9,7 +9,7 @@ int main()
 {
 	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(4, 0.2);
 
-	std::cout << graph->to_string();
+	std::cout << graph->toString();
 
 	graphio::writeGraph("graph.txt", graph);
 
@@ -17,5 +17,5 @@ int main()
 
     if (graph2 == nullptr) std::cout << "nullptr" << std::endl;
 
-    std::cout << graph2->to_string();
+    std::cout << graph2->toString();
 }
