@@ -3,8 +3,6 @@
 
 #define M_BLOCKSIZE 256
 
-using uint = unsigned int;
-
 #ifdef DEBUG
 
 #include <cstdio>
