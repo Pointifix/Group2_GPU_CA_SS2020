@@ -47,8 +47,8 @@ TEST_CASE("Test alg") {
     }
 
     SECTION("Prefix sum") {
-        const std::vector<unsigned int> a{2, 0, 0, 3, 1337, 42, 69};
-        const std::vector<unsigned int> exp{0, 2, 2, 2, 5, 1342, 1384};
+        const std::vector<unsigned int> a{2, 0, 0, 3, 1337, 42, 69, 0xDEADBEEF};
+        const std::vector<unsigned int> exp{0, 2, 2, 2, 5, 1342, 1384, 1453};
         std::vector<unsigned int> out(exp.size());
 
         SECTION("Sequential") {

@@ -93,13 +93,35 @@ namespace alg {
      * @param out
      * @param N
      */
-    __global__ void _exscan_parcu(const uint *a, uint *out, int N) {
-        int i = threadIdx.x + blockDim.x * blockIdx.x;
-        if (i < N) {
+    __global__ void _exscan_parcu(uint *out, int N) {
+        int tid = threadIdx.x;
+        int offset = 1;
 
-            // Up-sweep (reduce)
-            
+        // Sweep up (reduce)
+        for (int d = N>>1; d > 0; d >>= 1) {
+            __syncthreads();
+            if (tid < d) {
+                int src = offset * (2 * tid + 1) - 1;
+                int dst = offset * (2 * tid + 2) - 1;
+                out[dst] = out[src] + out[dst];
+            }
+            offset *= 2;
+        }
 
+        // Clear the last element
+        if (tid == 0) out[N-1] = 0;
+
+        // Sweep down
+        for (int d = 1; d < N; d *= 2) {
+            offset >>= 1;
+            __syncthreads();
+            if (tid < d) {
+                int src = offset * (2 * tid + 1) - 1;
+                int dst = offset * (2 * tid + 2) - 1;
+                int outsrc = out[src];
+                out[src] = out[dst];
+                out[dst] = outsrc + out[dst];
+            }
         }
     }
     void exscan_parcu(const std::vector<uint> &a, std::vector<uint> &out) {
@@ -112,7 +134,18 @@ namespace alg {
         int threadsPerBlock = M_BLOCKSIZE;
         int numBlocks = (int) ceil((float)N / (float)threadsPerBlock);
 
+        uint *d_a, *d_out;
 
+        //M_C(cudaMalloc((void **) &d_a, size));
+        M_C(cudaMalloc((void **) &d_out, size));
+        {
+            //M_C(cudaMemcpy(d_a, a.data(), size, cudaMemcpyHostToDevice));
+            M_C(cudaMemcpy(d_out, a.data(), size, cudaMemcpyHostToDevice));
+            M_CFUN((_exscan_parcu<<< numBlocks, threadsPerBlock >>>(d_out, N)));
+            M_C(cudaMemcpy(out.data(), d_out, size, cudaMemcpyDeviceToHost));
+        }
+        M_C(cudaFree(d_a));
+        M_C(cudaFree(d_out));
     }
 
 }
