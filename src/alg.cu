@@ -23,24 +23,6 @@ namespace alg {
     // PARALLEL IMPLEMENTATIONS (CUDA)
     // -----------------------------------------------------------------------------------------------------------------
 
-    __global__ void _countoccur_parcu(const uint *a, int Na, uint *out, int Nout, int offset) {
-        int i = threadIdx.x + blockDim.x * blockIdx.x;
-        __shared__ int partial_count[M_BLOCKSIZE];
-        if (i < Na) {
-            uint val = a[i];
-            uint start = offset * M_BLOCKSIZE;
-            uint end = min(start + M_BLOCKSIZE, Nout);
-            if (val >= start && val < end) {
-                // Increment shared variable
-                atomicAdd(&partial_count[val-start], 1u);
-            }
-            __syncthreads();
-            if (i < M_BLOCKSIZE) {
-                // Now add the partial count to 'out'
-                out[start+i] = partial_count[i];
-            }
-        }
-    }
     __global__ void _countoccur_parcu(const uint *a, int Na, uint *out) {
         int i = threadIdx.x + blockDim.x * blockIdx.x;
         if (i < Na) {
@@ -63,13 +45,7 @@ namespace alg {
         M_C(cudaMalloc((void **) &d_out, sizeout));
         {
             M_C(cudaMemcpy(d_a, a.data(), sizea, cudaMemcpyHostToDevice));
-            if (out.size() <= M_BLOCKSIZE) {
-                M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out)));
-            } else {
-                for (int offset = 0; offset < numBlocks; offset++) {
-                    M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out, out.size(), offset)));
-                }
-            }
+            M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out)));
             M_C(cudaMemcpy(out.data(), d_out, sizeout, cudaMemcpyDeviceToHost));
         }
         M_C(cudaFree(d_a));
@@ -112,17 +88,23 @@ namespace alg {
     }
 
     /**
-     *
+     * Source: https://www.eecs.umich.edu/courses/eecs570/hw/parprefix.pdf
      * @param a
      * @param out
      * @param N
      */
     __global__ void _exscan_parcu(const uint *a, uint *out, int N) {
+        int i = threadIdx.x + blockDim.x * blockIdx.x;
+        if (i < N) {
 
+            // Up-sweep (reduce)
+            
+
+        }
     }
     void exscan_parcu(const std::vector<uint> &a, std::vector<uint> &out) {
         M_A(a.size() == out.size());
-        if (a.size() == 0) return;
+        if (a.empty()) return;
 
         size_t N = a.size();
         const size_t size = N * sizeof(uint);
