@@ -3,19 +3,19 @@
 
 namespace alg {
 
-    void countoccur_seq(const std::vector<unsigned int> &a, std::vector<unsigned int> &out) {
-        for (unsigned int v : a) {
+    void countoccur_seq(const std::vector<uint> &a, std::vector<uint> &out) {
+        for (uint v : a) {
             out[v]++;
         }
     }
 
-    void prefixsum_seq(const std::vector<unsigned int> &a, std::vector<unsigned int> &out) {
+    void exscan_seq(const std::vector<uint> &a, std::vector<uint> &out) {
         M_A(a.size() == out.size());
         if (a.empty()) return;
 
-        out[0] = a[0];
+        out[0] = 0;
         for (int i = 1; i < a.size(); i++) {
-            out[i] = out[i-1] + a[i];
+            out[i] = out[i-1] + a[i-1];
         }
     }
 
@@ -23,55 +23,79 @@ namespace alg {
     // PARALLEL IMPLEMENTATIONS (CUDA)
     // -----------------------------------------------------------------------------------------------------------------
 
-    __global__ void _countoccur_parcu(const unsigned int *a, int na, unsigned int *out) {
+    __global__ void _countoccur_parcu(const uint *a, int Na, uint *out, int Nout, int offset) {
         int i = threadIdx.x + blockDim.x * blockIdx.x;
-        if (i < na) {
-            unsigned int val = a[i];
+        __shared__ int partial_count[M_BLOCKSIZE];
+        if (i < Na) {
+            uint val = a[i];
+            uint start = offset * M_BLOCKSIZE;
+            uint end = min(start + M_BLOCKSIZE, Nout);
+            if (val >= start && val < end) {
+                // Increment shared variable
+                atomicAdd(&partial_count[val-start], 1u);
+            }
+            __syncthreads();
+            if (i < M_BLOCKSIZE) {
+                // Now add the partial count to 'out'
+                out[start+i] = partial_count[i];
+            }
+        }
+    }
+    __global__ void _countoccur_parcu(const uint *a, int Na, uint *out) {
+        int i = threadIdx.x + blockDim.x * blockIdx.x;
+        if (i < Na) {
+            uint val = a[i];
             atomicAdd(&out[val], 1u); // Increment
         }
     }
-    void countoccur_parcu(const std::vector<unsigned int> &a, std::vector<unsigned int> &out) {
+    void countoccur_parcu(const std::vector<uint> &a, std::vector<uint> &out) {
         if (a.empty()) return;
         if (out.empty()) return;
 
-        unsigned int *d_a, *d_out;
-        size_t sizea = a.size() * sizeof(unsigned int);
-        size_t sizeout = out.size() * sizeof(unsigned int);
+        uint *d_a, *d_out;
+        size_t sizea = a.size() * sizeof(uint);
+        size_t sizeout = out.size() * sizeof(uint);
 
-        int threadsPerBlock = 256;
+        int threadsPerBlock = M_BLOCKSIZE;
         int numBlocks = (int) ceil((float)a.size() / (float)threadsPerBlock);
 
         M_C(cudaMalloc((void **) &d_a, sizea));
         M_C(cudaMalloc((void **) &d_out, sizeout));
         {
             M_C(cudaMemcpy(d_a, a.data(), sizea, cudaMemcpyHostToDevice));
-            M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out)));
+            if (out.size() <= M_BLOCKSIZE) {
+                M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out)));
+            } else {
+                for (int offset = 0; offset < numBlocks; offset++) {
+                    M_CFUN((_countoccur_parcu<<< numBlocks, threadsPerBlock >>>(d_a, a.size(), d_out, out.size(), offset)));
+                }
+            }
             M_C(cudaMemcpy(out.data(), d_out, sizeout, cudaMemcpyDeviceToHost));
         }
         M_C(cudaFree(d_a));
         M_C(cudaFree(d_out));
     }
 
-    __global__ void _add_parcu(const unsigned int *a, const unsigned int *b, unsigned int *out, int n) {
+    __global__ void _add_parcu(const uint *a, const uint *b, uint *out, int N) {
         int i = threadIdx.x + blockDim.x * blockIdx.x;
-        if (i < n) {
+        if (i < N) {
             out[i] = a[i] + b[i];
         }
     }
-    void add_parcu(const std::vector<unsigned int> &a,
-                   const std::vector<unsigned int> &b,
-                   std::vector<unsigned int> &out) {
+    void add_parcu(const std::vector<uint> &a,
+                   const std::vector<uint> &b,
+                   std::vector<uint> &out) {
         M_A(a.size() == b.size());
         M_A(a.size() == out.size());
         if (a.empty()) return;
 
         size_t N = a.size();
-        const size_t size = N * sizeof(unsigned int);
+        const size_t size = N * sizeof(uint);
 
-        int threadsPerBlock = 256;
+        int threadsPerBlock = M_BLOCKSIZE;
         int numBlocks = (int) ceil((float)N / (float)threadsPerBlock);
 
-        unsigned int *d_a, *d_b, *d_out;
+        uint *d_a, *d_b, *d_out;
 
         M_C(cudaMalloc((void **) &d_a, size));
         M_C(cudaMalloc((void **) &d_b, size));
@@ -87,6 +111,26 @@ namespace alg {
         M_C(cudaFree(d_out));
     }
 
+    /**
+     *
+     * @param a
+     * @param out
+     * @param N
+     */
+    __global__ void _exscan_parcu(const uint *a, uint *out, int N) {
 
+    }
+    void exscan_parcu(const std::vector<uint> &a, std::vector<uint> &out) {
+        M_A(a.size() == out.size());
+        if (a.size() == 0) return;
+
+        size_t N = a.size();
+        const size_t size = N * sizeof(uint);
+
+        int threadsPerBlock = M_BLOCKSIZE;
+        int numBlocks = (int) ceil((float)N / (float)threadsPerBlock);
+
+
+    }
 
 }

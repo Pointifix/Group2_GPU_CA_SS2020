@@ -1,6 +1,10 @@
 #ifndef GROUP2_GPU_CA_SS2020_COMMON_CUH
 #define GROUP2_GPU_CA_SS2020_COMMON_CUH
 
+#define M_BLOCKSIZE 256
+
+using uint = unsigned int;
+
 #ifdef DEBUG
 
 #include <cstdio>

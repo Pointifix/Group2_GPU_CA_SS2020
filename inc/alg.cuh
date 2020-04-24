@@ -17,12 +17,15 @@ namespace alg {
      * @param out Result will be written to this vector. Its size must be equal to the number of distinct elements in a
      */
     void countoccur_seq(const std::vector<unsigned int> &a, std::vector<unsigned int> &out);
+    void countoccur_parcu(const std::vector<unsigned int> &a, std::vector<unsigned int> &out);
 
     /**
-     * @param a The occurrence of the elements of this array will be counted
-     * @param out Result will be written to this vector. Its size must be equal to the number of distinct elements in a
+     * Aka "prefix sum", aka "cumulative sum" (cumsum)
+     * @param a This array's elements will be summed cumulatively
+     * @param out This array will store the cumulative sum of 'a'
      */
-    void countoccur_parcu(const std::vector<unsigned int> &a, std::vector<unsigned int> &out);
+    void exscan_seq(const std::vector<unsigned int> &a, std::vector<unsigned int> &out);
+    void exscan_parcu(const std::vector<unsigned int> &a, std::vector<unsigned int> &out);
 
 }
 

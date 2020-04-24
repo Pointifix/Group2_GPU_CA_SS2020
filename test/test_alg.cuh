@@ -21,16 +21,43 @@ TEST_CASE("Test alg") {
 
     SECTION("Count occurrences") {
         const std::vector<unsigned int> a{1u, 1u, 2u, 1u, 3u, 2u, 3u, 1u, 1u, 2u, 0u};
-        const std::vector<unsigned int> exp{1u, 5u, 3u, 2u}; // Expected output
+        const std::vector<unsigned int> expa{1u, 5u, 3u, 2u}; // Expected output
+        std::vector<unsigned int> outa(expa.size());
+
+        std::vector<uint> b(1000);
+        for (int i = 0; i < b.size(); i++) {
+            b[i] = i;
+        }
+        std::vector<uint> expb(1000);
+        std::fill(expb.begin(), expb.end(), 1);
+        std::vector<uint> outb(expb.size());
+
+        SECTION("Sequential") {
+            countoccur_seq(a, outa);
+            CHECK(outa == expa);
+        }
+
+        SECTION("Parallel") {
+            countoccur_parcu(a, outa);
+            CHECK(outa == expa);
+
+            countoccur_parcu(b, outb);
+            CHECK(outb == expb);
+        }
+    }
+
+    SECTION("Prefix sum") {
+        const std::vector<unsigned int> a{2, 0, 0, 3, 1337, 42, 69};
+        const std::vector<unsigned int> exp{0, 2, 2, 2, 5, 1342, 1384};
         std::vector<unsigned int> out(exp.size());
 
         SECTION("Sequential") {
-            countoccur_seq(a, out);
+            exscan_seq(a, out);
             CHECK(out == exp);
         }
 
         SECTION("Parallel") {
-            countoccur_parcu(a, out);
+            exscan_parcu(a, out);
             CHECK(out == exp);
         }
     }
