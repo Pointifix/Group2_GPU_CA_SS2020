@@ -4,18 +4,18 @@
 SSSP_Sequential::SSSP_Sequential(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
 }
 
-std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
+std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
 {
     int N = graph->edges.size();
     std::vector<int> cluster;
     std::vector<int> cost(N, std::numeric_limits<int>::max());
-    cost[source_node] = 0;
     std::vector<int> used_edge(N, -1);
+    std::vector<int> prev_vert(N, -1);
+    cost[source_node] = 0;
+    prev_vert[source_node] = source_node;
 
     // we initially add the source node and update the costs
     cluster.push_back(source_node);
-
-    std::cout << "picked source: " << source_node << std::endl;
 
     // either we take all edges until the end or until the next node stores its edges
     size_t edge_list_end = (source_node + 1 < graph->edges.size()) ? graph->edges[source_node + 1] : graph->destinations.size();
@@ -27,6 +27,7 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
         size_t dest_node = graph->destinations[i];
         cost[dest_node] = graph->weights[i]; // the cost is the weight of the edge
         used_edge[dest_node] = i; // we remember the index of the edge we use
+        prev_vert[dest_node] = source_node; // we remember the node we came from for this edge
     }
 
     do
@@ -49,8 +50,6 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
         {
             break;
         }
-
-        std::cout << "picked node: " << picked_node << std::endl;
 
         // we add this node to the cluster (index of the picked node)
         cluster.push_back(picked_node);
@@ -78,29 +77,54 @@ std::vector<std::shared_ptr<Path>> SSSP_Sequential::compute(int source_node)
             {
                 cost[dest_node] = cost[picked_node] + graph->weights[i]; // lets update its cost
                 used_edge[dest_node] = i;
+
+
+                prev_vert[dest_node] = picked_node;// we remember the node we came from for this edge
             }
         }
     } while(cluster.size() < graph->edges.size()); // while there is a vertex that is not reached yet
 
-    std::cout << "Single Shortest Path" << std::endl;
-    for(int i = 0; i < cluster.size(); i++)
+    std::vector<std::vector<int>> shortest_paths;
+
+    // to find all shortest paths we can just traverse the cluster reversed
+    for(int i = cluster.size()-1; i > 0; i--)
     {
-        std::cout << cluster[i] << " with edge " << used_edge[cluster[i]] << ", ";
+        std::vector<int> path;
+        int node = cluster[i];
+        int prev = prev_vert[node];
+
+        path.push_back(node);
+
+        // as long as the previous node is not the source node we keep iterating
+        while(prev != source_node)
+        {
+            path.push_back(prev);
+            node = prev;
+            prev = prev_vert[node];
+        }
+
+        // for completeness we also add the source node
+        path.push_back(prev);
+        shortest_paths.push_back(path);
     }
 
-    std::vector<std::shared_ptr<Path>> shortest_paths;
-
-    std::vector<int> e(graph->edges.size(), 0);
-    std::vector<int> d;
-    std::vector<int> w;
-
-    int runner = 0;
-    for(int i = 1; i < cluster.size(); i++) // for each new node we can create a new path (source_node to destination_node)
+    // as the paths are now reversed, we simply reverse the vectors
+    std::reverse(shortest_paths.begin(), shortest_paths.end());
+    for(int i = 0; i < shortest_paths.size(); i++)
     {
-        std::shared_ptr<Path> p;
-        p->source_node = source_node;
-        p->destination_node = cluster[i];
+        std::reverse(shortest_paths[i].begin(), shortest_paths[i].end());
     }
 
-    return std::vector<std::shared_ptr<Path>>();
+    std::cout << "Debug output:" << std::endl;
+    for(int i = 0; i < shortest_paths.size(); i++)
+    {
+        std::cout << "Paths [" << source_node << "] to [" << shortest_paths[i][shortest_paths[i].size()-1] << "]: ";
+        for(int j = 0; j < shortest_paths[i].size(); j++)
+        {
+            std::cout << " " << shortest_paths[i][j] << ",";
+        }
+        std::cout << std::endl;
+    }
+
+    return shortest_paths;
 }

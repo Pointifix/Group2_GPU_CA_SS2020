@@ -16,7 +16,7 @@ int main()
     std::cout << graph2->to_string();
 
     SSSP_Sequential sequ(graph2);
-    sequ.compute(2);
+    sequ.compute(4);
 
 
 }
