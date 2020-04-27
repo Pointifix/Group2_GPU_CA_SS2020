@@ -30,15 +30,15 @@ namespace graphgen {
         //   directedness
         const int num_edges = (int) (density * (float) num_nodes * (float) (num_nodes - 1) * (directed ? 1 : 0.5));
 
-        std::vector<int> edges(num_nodes);
-        std::vector<int> directions(num_edges);
-        std::vector<int> weights(num_edges);
+        std::vector<uint> edges(num_nodes);
+        std::vector<uint> directions(num_edges);
+        std::vector<uint> weights(num_edges);
 
         // init random number generator, create building vectors
         srand(seed);
-        std::vector<int> connected_nodes;
-        std::vector<int> not_connected_nodes(num_nodes);
-        std::vector<std::vector<int>> directions_builder(num_nodes);
+        std::vector<uint> connected_nodes;
+        std::vector<uint> not_connected_nodes(num_nodes);
+        std::vector<std::vector<uint>> directions_builder(num_nodes);
 
         // init vector with all nodes
         for (int i = 0; i < num_nodes; i++) {
@@ -75,7 +75,7 @@ namespace graphgen {
         }
 
         // assign random weights
-        for (int & weight : weights) {
+        for (uint & weight : weights) {
             weight = rand() % (max_weight + 1);
         }
 
