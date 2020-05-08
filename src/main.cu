@@ -10,13 +10,13 @@ int main()
 {
 	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(5, 0.2);
 	//std::cout << graph->to_string();
-	//graphio::writeGraph("graph.txt", graph);
+	//graphio::writeGraph("../output/graph", graph);
 
-    std::shared_ptr<Graph> graph2 = graphio::readGraph("graph.txt");
+    std::shared_ptr<Graph> graph2 = graphio::readGraph("../output/graph");
     std::cout << graph2->to_string();
 
     SSSP_Sequential sequ(graph2);
-    sequ.compute(4);
+    std::vector<std::vector<int>> paths = sequ.compute(4);
 
-
+    graphio::writePaths("../output/path", graph2, paths);
 }
