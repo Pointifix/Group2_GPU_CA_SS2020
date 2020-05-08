@@ -9,9 +9,9 @@
 
 int main()
 {
-	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(5, 0.2);
-	//std::cout << graph->toString();
-	//graphio::writeGraph("../output/graph", graph);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.003);
+	std::cout << graph->toString();
+	graphio::writeGraph("../output/graph", graph);
 
     std::shared_ptr<Graph> graph2 = graphio::readGraph("../output/graph-assignment");
     std::cout << graph2->toString();
