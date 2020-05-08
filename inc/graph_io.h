@@ -9,8 +9,6 @@
 
 #include "graph.h"
 
-typedef unsigned int uint;
-
 namespace graphio
 {
     const std::string file_extension = ".txt";
@@ -22,8 +20,8 @@ namespace graphio
      */
     void writeGraph(const std::string& filename, const std::shared_ptr<Graph>& graph)
     {
-        std::vector<uint> sources(graph->edges.size());
-        std::vector<uint> targets(graph->destinations.size());
+        std::vector<int> sources(graph->edges.size());
+        std::vector<int> targets(graph->destinations.size());
 
         std::ofstream stream;
         stream.open (filename + file_extension);
@@ -58,9 +56,9 @@ namespace graphio
 
         std::ifstream file(filename + file_extension);
 
-        std::vector<uint> edges;
-        std::vector<uint> destinations;
-        std::vector<uint> weights;
+        std::vector<int> edges;
+        std::vector<int> destinations;
+        std::vector<int> weights;
 
         if (file.is_open())
         {
@@ -82,9 +80,9 @@ namespace graphio
 
                 if (i == 0 && !values.at(0).compare("H"))
                 {
-                    edges = std::vector<uint>(std::stoi(values.at(1)));
-                    destinations = std::vector<uint>(std::stoi(values.at(2)));
-                    weights = std::vector<uint>(std::stoi(values.at(2)));
+                    edges = std::vector<int>(std::stoi(values.at(1)));
+                    destinations = std::vector<int>(std::stoi(values.at(2)));
+                    weights = std::vector<int>(std::stoi(values.at(2)));
                 }
                 else if (!values.at(0).compare("E"))
                 {

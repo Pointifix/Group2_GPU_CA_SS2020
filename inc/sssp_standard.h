@@ -2,6 +2,7 @@
 #define SSSP_Standard_H
 
 #include "sssp.h"
+#include <iostream>
 
 class SSSP_Standard : public SSSP {
 public:

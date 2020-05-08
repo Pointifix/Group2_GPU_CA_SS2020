@@ -3,6 +3,7 @@
 
 #include "sssp.h"
 #include <algorithm>
+#include <iostream>
 
 class SSSP_Sequential : public SSSP {
 public:
