@@ -2,6 +2,7 @@
 #define SSSP_Sequential_H
 
 #include "sssp.h"
+#include <algorithm>
 
 class SSSP_Sequential : public SSSP {
 public:
@@ -10,7 +11,7 @@ public:
      * @param graph graph that is used for computations.
      */
     explicit SSSP_Sequential(std::shared_ptr<Graph> graph);
-    std::vector<std::shared_ptr<Path>> compute(int source_node) override;
+    std::vector<std::vector<int>> compute(int source_node) override;
 };
 
 #endif /* SSSP_Sequential_H */
