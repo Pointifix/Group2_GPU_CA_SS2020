@@ -76,7 +76,7 @@ namespace graphgen {
 
         // assign random weights
         for (int & weight : weights) {
-            weight = rand() % (max_weight + 1);
+            weight = rand() % (max_weight) + 1;
         }
 
         // copy random directions (vector of vectors) into directions vector and set the pointers of edge vector to the corresponding offsets
