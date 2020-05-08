@@ -9,6 +9,8 @@
 
 #include "graph.h"
 
+typedef unsigned int uint;
+
 namespace graphio
 {
     const std::string file_extension = ".txt";

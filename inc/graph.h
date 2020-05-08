@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+typedef unsigned int uint;
+
 class Graph {
 public:
     Graph(std::vector<uint> &edges, std::vector<uint> &destinations, std::vector<uint> &weights);
