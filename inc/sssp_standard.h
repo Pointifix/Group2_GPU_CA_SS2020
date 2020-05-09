@@ -3,7 +3,7 @@
 
 #include "sssp.h"
 #include <iostream>
-
+#include <algorithm>
 #include <limits>
 
 class SSSP_Standard : public SSSP {
