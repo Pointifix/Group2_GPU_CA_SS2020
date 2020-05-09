@@ -1,4 +1,3 @@
-#include <iostream>
 #include "sssp_sequential.h"
 
 SSSP_Sequential::SSSP_Sequential(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {

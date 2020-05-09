@@ -5,18 +5,22 @@
 #include "graph_io.h"
 #include "sssp.h"
 #include "sssp_sequential.h"
+#include "sssp_standard.h"
 
 int main()
 {
-	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(5, 0.2);
-	//std::cout << graph->toString();
-	//graphio::writeGraph("../output/graph", graph);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.01);
+	std::cout << graph->toString();
+	graphio::writeGraph("../output/graph", graph);
 
     std::shared_ptr<Graph> graph2 = graphio::readGraph("../output/graph");
     std::cout << graph2->toString();
 
     SSSP_Sequential sequ(graph2);
-    std::vector<std::vector<int>> paths = sequ.compute(4);
+    std::vector<std::vector<int>> paths = sequ.compute(0);
 
     graphio::writePaths("../output/path", graph2, paths);
+
+    SSSP_Standard standard(graph2);
+    paths = standard.compute(0);
 }

@@ -5,14 +5,12 @@
 #include <vector>
 #include <string>
 
-typedef unsigned int uint;
-
 class Graph {
 public:
-    Graph(std::vector<uint> &edges, std::vector<uint> &destinations, std::vector<uint> &weights);
-    std::vector<uint> edges;
-    std::vector<uint> destinations;
-    std::vector<uint> weights;
+    Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights);
+    std::vector<int> edges;
+    std::vector<int> destinations;
+    std::vector<int> weights;
 
     std::string toString();
 };
@@ -27,10 +25,10 @@ public:
      * @param source_node Source Node (index)
      * @param destination_node Destination Node (index)
      */
-    Path(std::vector<uint> &edges, std::vector<uint> &destinations, std::vector<uint> &weights,
-            uint source_node, uint destination_node);
-    uint source_node;
-    uint destination_node;
+    Path(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights,
+            int source_node, int destination_node);
+    int source_node;
+    int destination_node;
 };
 
 #endif /* GRAPH_H */

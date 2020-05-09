@@ -6,7 +6,7 @@
   * @param destinations Destinations
   * @param weights Weights
   */
-Graph::Graph(std::vector<uint> &edges, std::vector<uint> &destinations, std::vector<uint> &weights) :
+Graph::Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights) :
     edges(std::move(edges)), destinations(std::move(destinations)), weights(std::move(weights))
 {
 }
@@ -29,8 +29,8 @@ std::string Graph::toString() {
     return builder + "\n";
 }
 
-Path::Path(std::vector<uint> &edges, std::vector<uint> &destinations, std::vector<uint> &weights,
-        uint source_node, uint destination_node) :
+Path::Path(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights,
+        int source_node, int destination_node) :
         Graph(edges, destinations, weights),
         source_node(source_node), destination_node(destination_node)
 {
