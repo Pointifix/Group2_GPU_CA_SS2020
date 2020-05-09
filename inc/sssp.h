@@ -11,7 +11,7 @@ public:
      * @param graph graph that is used for computations.
      */
     explicit SSSP(std::shared_ptr<Graph> graph) : graph(std::move(graph)) {};
-    virtual std::vector<std::shared_ptr<Path>> compute(int source_node) = 0;
+    virtual std::vector<std::vector<int>> compute(int source_node) = 0;
 protected:
     std::shared_ptr<Graph> graph;
 };
