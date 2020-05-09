@@ -9,11 +9,11 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.003);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.01);
 	std::cout << graph->toString();
 	graphio::writeGraph("../output/graph", graph);
 
-    std::shared_ptr<Graph> graph2 = graphio::readGraph("../output/graph-assignment");
+    std::shared_ptr<Graph> graph2 = graphio::readGraph("../output/graph");
     std::cout << graph2->toString();
 
     SSSP_Sequential sequ(graph2);

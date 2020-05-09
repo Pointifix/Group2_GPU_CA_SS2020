@@ -25,6 +25,13 @@ namespace graphio
 
         std::ofstream stream;
         stream.open (filename + file_extension);
+
+        if (!stream.is_open())
+        {
+            std::cerr << "Failed to open stream: " << filename << file_extension << std::endl;
+            return;
+        }
+
         stream << "H " + std::to_string(graph->edges.size()) + " " + std::to_string(graph->destinations.size()) + " 0";
 
         for (size_t i = 0; i < graph->edges.size(); i++)
@@ -54,82 +61,83 @@ namespace graphio
     {
         std::shared_ptr<Graph> graph;
 
-        std::ifstream file(filename + file_extension);
+        std::ifstream stream(filename + file_extension);
+
+        if (!stream.is_open())
+        {
+            std::cerr << "Failed to open stream: " << filename << file_extension << std::endl;
+            return nullptr;
+        }
 
         std::vector<int> edges;
         std::vector<int> destinations;
         std::vector<int> weights;
 
-        if (file.is_open())
+        size_t i = 0;
+        std::string line;
+        std::string value;
+        int current_node = -1;
+        int current_edge_count = 0;
+        int current_target = 0;
+        while (getline(stream, line))
         {
-            size_t i = 0;
-            std::string line;
-            std::string value;
-            int current_node = -1;
-            int current_edge_count = 0;
-            int current_target = 0;
-            while (getline(file,line))
+            std::stringstream ss(line);
+            std::vector<std::string> values;
+            while (getline(ss, value, ' '))
             {
-                std::stringstream ss(line);
-                std::vector<std::string> values;
-                while (getline(ss, value, ' '))
+                values.push_back(value);
+            }
+            if (values.size() != 4) return nullptr;
+
+            if (i == 0 && !values.at(0).compare("H"))
+            {
+                edges = std::vector<int>(std::stoi(values.at(1)));
+                destinations = std::vector<int>(std::stoi(values.at(2)));
+                weights = std::vector<int>(std::stoi(values.at(2)));
+            }
+            else if (!values.at(0).compare("E"))
+            {
+                int source = std::stoi(values.at(1));
+                int target = std::stoi(values.at(2));
+                int weight = std::stoi(values.at(3));
+
+                if (source == current_node && target > current_target)
                 {
-                    values.push_back(value);
+                    destinations.at(current_edge_count) = target;
+                    weights.at(current_edge_count) = weight;
                 }
-                if (values.size() != 4) return nullptr;
-
-                if (i == 0 && !values.at(0).compare("H"))
+                else if (source > current_node)
                 {
-                    edges = std::vector<int>(std::stoi(values.at(1)));
-                    destinations = std::vector<int>(std::stoi(values.at(2)));
-                    weights = std::vector<int>(std::stoi(values.at(2)));
-                }
-                else if (!values.at(0).compare("E"))
-                {
-                    int source = std::stoi(values.at(1));
-                    int target = std::stoi(values.at(2));
-                    int weight = std::stoi(values.at(3));
-
-                    if (source == current_node && target > current_target)
+                    for (size_t i = current_node + 1; i < source; i++)
                     {
-                        destinations.at(current_edge_count) = target;
-                        weights.at(current_edge_count) = weight;
+                        edges.at(i) = current_edge_count;
                     }
-                    else if (source > current_node)
-                    {
-                        for (size_t i = current_node + 1; i < source; i++)
-                        {
-                            edges.at(i) = current_edge_count;
-                        }
 
-                        current_node = source;
-                        edges.at(current_node) = current_edge_count;
-                        destinations.at(current_edge_count) = target;
-                        weights.at(current_edge_count) = weight;
-                    }
-                    else return nullptr;
-
-                    current_target = target;
-                    current_edge_count++;
+                    current_node = source;
+                    edges.at(current_node) = current_edge_count;
+                    destinations.at(current_edge_count) = target;
+                    weights.at(current_edge_count) = weight;
                 }
                 else return nullptr;
 
-                i++;
+                current_target = target;
+                current_edge_count++;
             }
+            else return nullptr;
 
-            current_node++;
-            while (current_node < edges.size())
-            {
-                edges.at(current_node) = current_edge_count;
-                current_node++;
-            }
-
-            file.close();
-
-            return std::make_shared<Graph>(edges, destinations, weights);
+            i++;
         }
 
-        return nullptr;
+        current_node++;
+        while (current_node < edges.size())
+        {
+            edges.at(current_node) = current_edge_count;
+            current_node++;
+        }
+
+        stream.close();
+
+        return std::make_shared<Graph>(edges, destinations, weights);
     }
 
     /**
@@ -144,6 +152,13 @@ namespace graphio
         for(int i = 0; i < shortest_paths.size(); i++)
         {
             stream.open(filename + std::to_string(shortest_paths[i][shortest_paths[i].size()-1]) + file_extension);
+
+            if (!stream.is_open())
+            {
+                std::cerr << "Failed to open stream: " << filename << file_extension << std::endl;
+                continue;
+            }
+
             stream << "H " + std::to_string(shortest_paths[i].size()) + " " + std::to_string(shortest_paths[i].size() - 1) + " 0";
 
             for(int j = 0; j < shortest_paths[i].size() - 1; j++)
