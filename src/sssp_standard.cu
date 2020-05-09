@@ -73,25 +73,23 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
     int *d_cost = 0;
     int *d_update_cost = 0;
 
-    cudaError_t cudaStatus = cudaSetDevice(0);
+    M_C(cudaMalloc((void**) &d_edges,          graph->edges.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_destinations,   graph->destinations.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_weights,        graph->weights.size() * sizeof(int)));
 
-    cudaStatus = cudaMalloc((void**) &d_edges,          graph->edges.size() * sizeof(int));
-    cudaStatus = cudaMalloc((void**) &d_destinations,   graph->destinations.size() * sizeof(int));
-    cudaStatus = cudaMalloc((void**) &d_weights,        graph->weights.size() * sizeof(int));
+    M_C(cudaMalloc((void**) &d_previous_node, previous_node.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_mask, mask.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_cost, cost.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_update_cost, update_cost.size() * sizeof(int)));
 
-    cudaStatus = cudaMalloc((void**) &d_previous_node, previous_node.size() * sizeof(int));
-    cudaStatus = cudaMalloc((void**) &d_mask, mask.size() * sizeof(int));
-    cudaStatus = cudaMalloc((void**) &d_cost, cost.size() * sizeof(int));
-    cudaStatus = cudaMalloc((void**) &d_update_cost, update_cost.size() * sizeof(int));
+    M_C(cudaMemcpy(d_edges,        &graph->edges[0],        graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(int),   cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_weights,      &graph->weights[0],      graph->weights.size() * sizeof(int),        cudaMemcpyHostToDevice));
 
-    cudaStatus = cudaMemcpy(d_edges,        &graph->edges[0],        graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice);
-    cudaStatus = cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(int),   cudaMemcpyHostToDevice);
-    cudaStatus = cudaMemcpy(d_weights,      &graph->weights[0],      graph->weights.size() * sizeof(int),        cudaMemcpyHostToDevice);
-
-    cudaStatus = cudaMemcpy(d_previous_node,&previous_node[0],   previous_node.size() * sizeof(int), cudaMemcpyHostToDevice);
-    cudaStatus = cudaMemcpy(d_mask,         &mask[0],            mask.size() * sizeof(int),          cudaMemcpyHostToDevice);
-    cudaStatus = cudaMemcpy(d_cost,         &cost[0],            cost.size() * sizeof(int),          cudaMemcpyHostToDevice);
-    cudaStatus = cudaMemcpy(d_update_cost,  &update_cost[0],     update_cost.size() * sizeof(int),   cudaMemcpyHostToDevice);
+    M_C(cudaMemcpy(d_previous_node,&previous_node[0],   previous_node.size() * sizeof(int), cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_mask,         &mask[0],            mask.size() * sizeof(int),          cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_cost,         &cost[0],            cost.size() * sizeof(int),          cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_update_cost,  &update_cost[0],     update_cost.size() * sizeof(int),   cudaMemcpyHostToDevice));
 
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask.begin(), mask.end(), true) != mask.end())
@@ -99,21 +97,32 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
         int numBlocks = ceil((double)graph->edges.size() / 1024);
 
         dim3 threadsPerBlock(32, 32);
-        CUDA_SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(d_edges, d_destinations, d_weights,
-                d_previous_node, d_mask, d_cost, d_update_cost, graph->edges.size(), graph->destinations.size());
-        cudaDeviceSynchronize();
+        M_CFUN((CUDA_SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(d_edges, d_destinations, d_weights,
+                d_previous_node, d_mask, d_cost, d_update_cost, graph->edges.size(), graph->destinations.size())));
 
-        CUDA_SSSP_Kernel2<<<numBlocks, threadsPerBlock>>>(d_mask, d_cost, d_update_cost, graph->edges.size());
-        // wait for all kernels to finish, so we get the finalised mask back
-        cudaDeviceSynchronize();
+        M_CFUN((CUDA_SSSP_Kernel2<<<numBlocks, threadsPerBlock>>>(d_mask, d_cost, d_update_cost, graph->edges.size())));
 
         //copy back mask
-        cudaError_t err = cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost);
+        M_C(cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost));
+
+        std::cout << "\nMask: " << std::endl;
+        for(int i : mask)
+        {
+            std::cout << i << ",";
+        }
     }
 
-    cudaMemcpy(&previous_node[0], d_previous_node, previous_node.size() * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&cost[0], d_cost, cost.size() * sizeof(int), cudaMemcpyDeviceToHost);
-    cudaMemcpy(&update_cost[0], d_update_cost, update_cost.size() * sizeof(int), cudaMemcpyDeviceToHost);
+    M_C(cudaMemcpy(&previous_node[0], d_previous_node, previous_node.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(&cost[0], d_cost, cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(&update_cost[0], d_update_cost, update_cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
+
+    M_C(cudaFree(d_edges));
+    M_C(cudaFree(d_destinations));
+    M_C(cudaFree(d_weights));
+    M_C(cudaFree(d_previous_node));
+    M_C(cudaFree(d_mask));
+    M_C(cudaFree(d_cost));
+    M_C(cudaFree(d_update_cost));
 
     std::cout << "\n\nMask: ";
     for(int i = 0; i < mask.size(); i++)
