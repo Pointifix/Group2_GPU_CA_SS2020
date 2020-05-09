@@ -2,6 +2,7 @@
 #define GROUP2_GPU_CA_SS2020_COMMON_CUH
 
 #define M_BLOCKSIZE 256
+using uint = unsigned int;
 
 #ifdef DEBUG
 
@@ -35,7 +36,7 @@ namespace debug {
 } while(0)
 
 // DEBUG
-#define M_D(a)
+#define M_D(a) a
 
 // ASSERT
 #define M_A(a) if(!(a)) { \
