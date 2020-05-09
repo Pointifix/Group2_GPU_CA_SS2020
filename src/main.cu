@@ -9,7 +9,7 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(10, 0.3);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.01);
 	std::cout << graph->toString() << std::endl;
 	graphio::writeGraph("output/graph", graph);
 
@@ -25,11 +25,4 @@ int main()
     SSSP_Standard standard(graph2);
     std::shared_ptr<Paths> paths2 = standard.compute(0);
     std::cout << paths2->toString() << std::endl;
-
-    std::vector<int> path = paths1->getPath(5);
-
-    for(int i = 0; i < path.size(); i++)
-    {
-        std::cout << path[i] << ", ";
-    }
 }
