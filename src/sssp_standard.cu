@@ -142,5 +142,21 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
         std::cout << previous_node[i] << ",";
     }
 
+    std::vector<std::vector<int>> shortest_paths;
+
+    for(int i = 0; i < previous_node.size(); i++)
+    {
+        std::vector<int> path;
+        int currentNodeIndex = i;
+
+        for(int j = 0; j < previous_node.size(); j++)
+        {
+            if(currentNodeIndex == source_node)
+            {
+                path.push_back(source_node);
+            }
+        }
+    }
+
     return std::vector<std::vector<int>>();
 }
