@@ -3,6 +3,7 @@
 SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
 }
 
+//https://cs.calvin.edu/courses/cs/374/CUDA/CUDA-Thread-Indexing-Cheatsheet.pdf
 __device__ int getGlobalIdx_3D_3D(){
     int blockId = blockIdx.x + blockIdx.y * gridDim.x
                   + gridDim.x * gridDim.y * blockIdx.z;
@@ -54,9 +55,9 @@ __global__ void CUDA_SSSP_Kernel2(int* mask, int* cost, int* update_cost, int no
     update_cost[tid] = cost[tid];
 }
 
-std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
+std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
 {
-    std::vector<int> previous_node(graph->edges.size(), -1);
+    std::vector<int> previous_nodes(graph->edges.size(), -1);
     std::vector<int> mask(graph->edges.size(), 0);
     std::vector<int> cost(graph->edges.size(), std::numeric_limits<int>::max()), update_cost(graph->edges.size(),
             std::numeric_limits<int>::max());
@@ -65,19 +66,19 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
     cost.at(source_node) = 0;
     update_cost.at(source_node) = 0;
 
-    int *d_edges = 0;
-    int *d_destinations = 0;
-    int *d_weights = 0;
-    int *d_previous_node = 0;
-    int *d_mask = 0;
-    int *d_cost = 0;
-    int *d_update_cost = 0;
+    int *d_edges = nullptr;
+    int *d_destinations = nullptr;
+    int *d_weights = nullptr;
+    int *d_previous_node = nullptr;
+    int *d_mask = nullptr;
+    int *d_cost = nullptr;
+    int *d_update_cost = nullptr;
 
     M_C(cudaMalloc((void**) &d_edges,          graph->edges.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_destinations,   graph->destinations.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_weights,        graph->weights.size() * sizeof(int)));
 
-    M_C(cudaMalloc((void**) &d_previous_node, previous_node.size() * sizeof(int)));
+    M_C(cudaMalloc((void**) &d_previous_node, previous_nodes.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_mask, mask.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_cost, cost.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_update_cost, update_cost.size() * sizeof(int)));
@@ -86,7 +87,7 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
     M_C(cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(int),   cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_weights,      &graph->weights[0],      graph->weights.size() * sizeof(int),        cudaMemcpyHostToDevice));
 
-    M_C(cudaMemcpy(d_previous_node,&previous_node[0],   previous_node.size() * sizeof(int), cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_previous_node,&previous_nodes[0],  previous_nodes.size() * sizeof(int),cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_mask,         &mask[0],            mask.size() * sizeof(int),          cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_cost,         &cost[0],            cost.size() * sizeof(int),          cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_update_cost,  &update_cost[0],     update_cost.size() * sizeof(int),   cudaMemcpyHostToDevice));
@@ -104,15 +105,9 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
 
         //copy back mask
         M_C(cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost));
-
-        std::cout << "\nMask: " << std::endl;
-        for(int i : mask)
-        {
-            std::cout << i << ",";
-        }
     }
 
-    M_C(cudaMemcpy(&previous_node[0], d_previous_node, previous_node.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(&previous_nodes[0], d_previous_node, previous_nodes.size() * sizeof(int), cudaMemcpyDeviceToHost));
     M_C(cudaMemcpy(&cost[0], d_cost, cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
     M_C(cudaMemcpy(&update_cost[0], d_update_cost, update_cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
 
@@ -124,42 +119,7 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
     M_C(cudaFree(d_cost));
     M_C(cudaFree(d_update_cost));
 
-    std::cout << "\n\nMask: ";
-    for(int i = 0; i < mask.size(); i++)
-    {
-        std::cout << mask[i] << ",";
-    }
-    std::cout << "\n\nCost: ";
-    for(int i = 0; i < cost.size(); i++)
-    {
-        std::cout << cost[i] << ",";
-    }
-    std::cout << "\n\nUpdateCost: ";
-    for(int i = 0; i < update_cost.size(); i++)
-    {
-        std::cout << update_cost[i] << ",";
-    }
-    std::cout << "\n\nPreviousNode: ";
-    for(int i = 0; i < previous_node.size(); i++)
-    {
-        std::cout << previous_node[i] << ",";
-    }
+    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, source_node, graph));
 
-    std::vector<std::vector<int>> shortest_paths;
-
-    for(int i = 0; i < previous_node.size(); i++)
-    {
-        std::vector<int> path;
-        int currentNodeIndex = i;
-
-        for(int j = 0; j < previous_node.size(); j++)
-        {
-            if(currentNodeIndex == source_node)
-            {
-                path.push_back(source_node);
-            }
-        }
-    }
-
-    return std::vector<std::vector<int>>();
+    return paths;
 }

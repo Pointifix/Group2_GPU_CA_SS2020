@@ -7,7 +7,14 @@
 
 class Graph {
 public:
+    /**
+     * Encapsulates a graph represented in sparse matrix form
+     * @param edges
+     * @param destinations
+     * @param weights
+     */
     Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights);
+
     std::vector<int> edges;
     std::vector<int> destinations;
     std::vector<int> weights;
@@ -15,20 +22,23 @@ public:
     std::string toString();
 };
 
-class Path : public Graph {
+class Paths {
 public:
     /**
-     * Creates a Path instance.
-     * @param edges Edges
-     * @param destinations Destinations
-     * @param weights Weights
-     * @param source_node Source Node (index)
-     * @param destination_node Destination Node (index)
+     * Encapsulates all paths in a graph from a single source
+     * @param previous_nodes
+     * @param source_node
+     * @param graph
      */
-    Path(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights,
-            int source_node, int destination_node);
+    Paths(std::vector<int> &previous_nodes, int source_node, std::shared_ptr<Graph> graph);
+
+    std::vector<int>previous_nodes;
     int source_node;
-    int destination_node;
+    std::shared_ptr<Graph> graph;
+
+    std::string toString();
+
+    std::vector<int> getPath(int destination);
 };
 
 #endif /* GRAPH_H */

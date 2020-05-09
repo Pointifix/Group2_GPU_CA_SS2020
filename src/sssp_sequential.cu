@@ -3,13 +3,13 @@
 SSSP_Sequential::SSSP_Sequential(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
 }
 
-std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
+std::shared_ptr<Paths> SSSP_Sequential::compute(int source_node)
 {
     int N = graph->edges.size();
     std::vector<int> cluster;
     std::vector<int> cost(N, std::numeric_limits<int>::max());
     std::vector<int> used_edge(N, -1);
-    std::vector<int> prev_vert(N, -1);
+    std::vector<int> previous_nodes(N, -1);
     cost[source_node] = 0;
 
     // we initially add the source node and update the costs
@@ -25,7 +25,7 @@ std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
         size_t dest_node = graph->destinations[i];
         cost[dest_node] = graph->weights[i]; // the cost is the weight of the edge
         used_edge[dest_node] = i; // we remember the index of the edge we use
-        prev_vert[dest_node] = source_node; // we remember the node we came from for this edge
+        previous_nodes[dest_node] = source_node; // we remember the node we came from for this edge
     }
 
     do
@@ -76,49 +76,12 @@ std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
                 cost[dest_node] = cost[picked_node] + graph->weights[i]; // lets update its cost
                 used_edge[dest_node] = i;
 
-                prev_vert[dest_node] = picked_node;// we remember the node we came from for this edge
+                previous_nodes[dest_node] = picked_node;// we remember the node we came from for this edge
             }
         }
     } while(cluster.size() < graph->edges.size()); // while there is a vertex that is not reached yet
 
+    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, source_node, graph));
 
-    std::cout << "PreviousNode Sequential: " << std::endl;
-
-    for(int i = 0; i < prev_vert.size(); i++)
-    {
-        std::cout << prev_vert[i] << ", ";
-    }
-
-    std::vector<std::vector<int>> shortest_paths;
-
-    // to find all shortest paths we can just traverse the cluster reversed
-    for(int i = cluster.size()-1; i > 0; i--)
-    {
-        std::vector<int> path;
-        int node = cluster[i];
-        int prev = prev_vert[node];
-
-        path.push_back(node);
-
-        // as long as the previous node is not the source node we keep iterating
-        while(prev != source_node)
-        {
-            path.push_back(prev);
-            node = prev;
-            prev = prev_vert[node];
-        }
-
-        // for completeness we also add the source node
-        path.push_back(prev);
-        shortest_paths.push_back(path);
-    }
-
-    // as the paths are now reversed, we simply reverse the vectors
-    std::reverse(shortest_paths.begin(), shortest_paths.end());
-    for(int i = 0; i < shortest_paths.size(); i++)
-    {
-        std::reverse(shortest_paths[i].begin(), shortest_paths[i].end());
-    }
-
-    return shortest_paths;
+    return paths;
 }
