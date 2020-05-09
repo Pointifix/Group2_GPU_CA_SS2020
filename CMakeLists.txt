@@ -9,6 +9,8 @@ include_directories(inc)
 set(ALL_SRCS # NO MAIN ALLOWED HERE!
     # graph
         src/graph.cu
+    # alg
+        src/alg.cu
     # sssp
         src/sssp_standard.cu
         src/sssp_sequential.cu
@@ -29,13 +31,14 @@ set_target_properties(
 
 if(CMAKE_BUILD_TYPE MATCHES Debug)
     message("Debug mode")
-    #add_definitions("-DDEBUG")
+    add_definitions("-DDEBUG")
 
     message("Adding Test executable")
     add_executable(Test
             ${ALL_SRCS}
             test/tests.cpp
-            test/test_graph.hpp)
+            test/test_graph.hpp
+            test/test_alg.cuh)
     set_target_properties(
             Test
             PROPERTIES
