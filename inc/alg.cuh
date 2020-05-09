@@ -3,6 +3,8 @@
 
 #include <vector>
 
+using uint = unsigned int;
+
 namespace alg {
 
     /**

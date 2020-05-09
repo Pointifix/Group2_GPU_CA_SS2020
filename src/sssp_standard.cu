@@ -109,12 +109,6 @@ std::vector<std::vector<int>> SSSP_Standard::compute(int source_node)
 
         //copy back mask
         cudaError_t err = cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost);
-
-        std::cout << "\nMask: " << std::endl;
-        for(int i : mask)
-        {
-            std::cout << i << ",";
-        }
     }
 
     cudaMemcpy(&previous_node[0], d_previous_node, previous_node.size() * sizeof(int), cudaMemcpyDeviceToHost);

@@ -11,7 +11,6 @@ std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
     std::vector<int> used_edge(N, -1);
     std::vector<int> prev_vert(N, -1);
     cost[source_node] = 0;
-    prev_vert[source_node] = source_node;
 
     // we initially add the source node and update the costs
     cluster.push_back(source_node);
@@ -77,11 +76,18 @@ std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
                 cost[dest_node] = cost[picked_node] + graph->weights[i]; // lets update its cost
                 used_edge[dest_node] = i;
 
-
                 prev_vert[dest_node] = picked_node;// we remember the node we came from for this edge
             }
         }
     } while(cluster.size() < graph->edges.size()); // while there is a vertex that is not reached yet
+
+
+    std::cout << "PreviousNode Sequential: " << std::endl;
+
+    for(int i = 0; i < prev_vert.size(); i++)
+    {
+        std::cout << prev_vert[i] << ", ";
+    }
 
     std::vector<std::vector<int>> shortest_paths;
 
@@ -112,17 +118,6 @@ std::vector<std::vector<int>> SSSP_Sequential::compute(int source_node)
     for(int i = 0; i < shortest_paths.size(); i++)
     {
         std::reverse(shortest_paths[i].begin(), shortest_paths[i].end());
-    }
-
-    std::cout << "Debug output:" << std::endl;
-    for(int i = 0; i < shortest_paths.size(); i++)
-    {
-        std::cout << "Paths [" << source_node << "] to [" << shortest_paths[i][shortest_paths[i].size()-1] << "]: ";
-        for(int j = 0; j < shortest_paths[i].size(); j++)
-        {
-            std::cout << " " << shortest_paths[i][j] << ",";
-        }
-        std::cout << std::endl;
     }
 
     return shortest_paths;
