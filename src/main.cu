@@ -10,7 +10,7 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(100, 0.05);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(32, 0.1);
 	std::cout << graph->toString();
 	graphio::writeGraph("graph", graph);
 

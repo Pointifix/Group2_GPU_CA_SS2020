@@ -29,8 +29,8 @@ std::string Graph::toString() {
     return builder + "\n";
 }
 
-Paths::Paths(std::vector<int> &previous_nodes, int source_node, std::shared_ptr<Graph> graph) :
-    previous_nodes(std::move(previous_nodes)), source_node(source_node), graph(graph)
+Paths::Paths(std::vector<int> &previous_nodes, std::vector<int> &costs, int source_node, std::shared_ptr<Graph> graph) :
+    previous_nodes(std::move(previous_nodes)), costs(costs), source_node(source_node), graph(graph)
 {
 }
 
@@ -65,6 +65,6 @@ std::vector<int> Paths::getPath(int destination)
 }
 
 bool Paths::isEqualTo(const Paths* path) {
-    return this->previous_nodes.size() == path->previous_nodes.size() && std::equal(this->previous_nodes.begin(),
-                      this->previous_nodes.begin() + this->previous_nodes.size(), path->previous_nodes.begin());
+    return this->costs.size() == path->costs.size() && std::equal(this->costs.begin(),
+                      this->costs.begin() + this->costs.size(), path->costs.begin());
 }

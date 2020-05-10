@@ -119,7 +119,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     M_C(cudaFree(d_cost));
     M_C(cudaFree(d_update_cost));
 
-    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, source_node, graph));
+    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, cost, source_node, graph));
 
     return paths;
 }

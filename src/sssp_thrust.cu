@@ -102,5 +102,8 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
     std::vector<int> ret_previous_nodes(previous_nodes.size());
     thrust::copy(previous_nodes.begin(), previous_nodes.end(), ret_previous_nodes.begin());
 
-    return std::make_shared<Paths>(Paths(ret_previous_nodes, source_node, graph));
+    std::vector<int> ret_cost(cost.size());
+    thrust::copy(cost.begin(), cost.end(), ret_cost.begin());
+
+    return std::make_shared<Paths>(Paths(ret_previous_nodes, ret_cost, source_node, graph));
 }
