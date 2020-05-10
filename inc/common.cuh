@@ -4,6 +4,57 @@
 #define M_BLOCKSIZE 256
 using uint = unsigned int;
 
+__device__ int getGlobalIdx_3D_3D(){
+    int blockId = blockIdx.x + blockIdx.y * gridDim.x
+                  + gridDim.x * gridDim.y * blockIdx.z;
+    int threadId = blockId * (blockDim.x * blockDim.y * blockDim.z)
+                   + (threadIdx.z * (blockDim.x * blockDim.y))
+                   + (threadIdx.y * blockDim.x) + threadIdx.x;
+    return threadId;
+}
+
+__global__ void CUDA_SSSP_Kernel1(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
+                                  const int* cost, int* update_cost, int nodes_amount, int edges_amount)
+{
+    int tid = getGlobalIdx_3D_3D();
+
+    if (tid >= nodes_amount) return;
+
+    if (mask[tid])
+    {
+        int first = edges[tid];
+        int last = (tid + 1 < nodes_amount) ? edges[tid + 1] : edges_amount;
+
+        mask[tid] = false;
+
+        for (int i = first; i < last; i++)
+        {
+            int nid = destinations[i];
+
+            if(update_cost[nid] > cost[tid] + weights[i])
+            {
+                update_cost[nid] = cost[tid] + weights[i];
+                previous_node[nid] = tid;
+            }
+        }
+    }
+}
+
+__global__ void CUDA_SSSP_Kernel2(int* mask, int* cost, int* update_cost, int nodes_amount)
+{
+    int tid = getGlobalIdx_3D_3D();
+
+    if (tid >= nodes_amount) return;
+
+    if(cost[tid] > update_cost[tid])
+    {
+        cost[tid] = update_cost[tid];
+        mask[tid] = true;
+    }
+
+    update_cost[tid] = cost[tid];
+}
+
 #ifdef DEBUG
 
 #include <cstdio>

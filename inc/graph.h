@@ -32,9 +32,10 @@ public:
      * @param source_node
      * @param graph
      */
-    Paths(std::vector<int> &previous_nodes, int source_node, std::shared_ptr<Graph> graph);
+    Paths(std::vector<int> &previous_nodes, std::vector<int> &costs, int source_node, std::shared_ptr<Graph> graph);
 
     std::vector<int>previous_nodes;
+    std::vector<int> costs;
     int source_node;
     std::shared_ptr<Graph> graph;
 

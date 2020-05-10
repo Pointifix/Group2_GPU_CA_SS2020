@@ -7124,9 +7124,9 @@ namespace Catch {
 
                 auto iters = Detail::warmup<Clock>();
                 auto resolution = Detail::estimate_clock_resolution<Clock>(iters);
-                auto cost = Detail::estimate_clock_cost<Clock>(resolution.mean);
+                auto costs = Detail::estimate_clock_cost<Clock>(resolution.mean);
 
-                env = new Environment<FloatDuration<Clock>>{ resolution, cost };
+                env = new Environment<FloatDuration<Clock>>{ resolution, costs };
                 return *env;
             }
         } // namespace Detail
