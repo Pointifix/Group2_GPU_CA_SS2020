@@ -151,7 +151,9 @@ namespace graphio
 
         for(int i = 0; i < paths->previous_nodes.size(); i++)
         {
-            stream.open(filename + std::to_string(paths->previous_nodes.at(i)) + file_extension);
+            if (paths->previous_nodes[i] == -1) continue;
+
+            stream.open(filename + std::to_string(i) + file_extension);
 
             if (!stream.is_open())
             {
@@ -159,9 +161,9 @@ namespace graphio
                 continue;
             }
 
-            stream << "H " + std::to_string(paths->previous_nodes.size()) + " " + std::to_string(paths->previous_nodes.size() - 1) + " 0";
-
             std::vector<int> path = paths->getPath(i);
+
+            stream << "H " + std::to_string(path.size()) + " " + std::to_string(path.size() - 1) + " 0";
 
             for(int j = 0; j < path.size() - 1; j++)
             {

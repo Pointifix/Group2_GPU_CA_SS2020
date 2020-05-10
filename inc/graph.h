@@ -22,6 +22,8 @@ public:
     std::vector<int> weights;
 
     std::string toString();
+
+    std::vector<std::vector<int>> getAdjacencyMatrix();
 };
 
 class Paths {

@@ -1,4 +1,5 @@
 #include <iostream>
+#include <chrono>
 
 #include "graph.h"
 #include "graph_generator.h"
@@ -10,19 +11,35 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(32, 0.1);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(32, 0.04);
 	std::cout << graph->toString();
-	graphio::writeGraph("graph", graph);
+	graphio::writeGraph("output/graph", graph);
 
-    std::shared_ptr<Graph> graph2 = graphio::readGraph("graph");
+    std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
     std::cout << graph2->toString();
-    
+
+
+    auto adjacencyMatrix = graph2->getAdjacencyMatrix();
+
+    /*
+    std::cout << "Adjacency Matrix:" << std::endl;
+    for(int i = 0; i < graph2->edges.size(); i++)
+    {
+        for(int j = 0; j < graph2->edges.size(); j++)
+        {
+            std::cout << adjacencyMatrix[i][j] << ", ";
+        }
+        std::cout << std::endl;
+    }
+     */
+
     SSSP_Sequential sequ(graph2);
     std::shared_ptr<Paths> paths1 = sequ.compute(0);
     std::cout << paths1->toString() << std::endl;
 
     graphio::writePaths("output/path_sequential", paths1);
 
+    std::cout << "Standard SSSP" << std::endl;
     SSSP_Standard standard(graph2);
     std::shared_ptr<Paths> paths2 = standard.compute(0);
     std::cout << paths2->toString() << std::endl;

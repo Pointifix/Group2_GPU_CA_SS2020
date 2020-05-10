@@ -33,8 +33,15 @@ __global__ void CUDA_SSSP_Kernel1(const int* edges, const int* destinations, con
 
             if(update_cost[nid] > cost[tid] + weights[i])
             {
-                update_cost[nid] = cost[tid] + weights[i];
-                previous_node[nid] = tid;
+                int old_cost = update_cost[nid];
+                int new_cost = cost[tid] + weights[i];
+
+                int old = atomicMin(&update_cost[nid], new_cost);
+
+                //this is not thread save yet, NEED FIXING
+                //TODO
+                //in fact, much TODO
+                if (old == old_cost) previous_node[nid] = tid;
             }
         }
     }
@@ -46,7 +53,7 @@ __global__ void CUDA_SSSP_Kernel2(int* mask, int* cost, int* update_cost, int no
 
     if (tid >= nodes_amount) return;
 
-    if(cost[tid] > update_cost[tid])
+    if (cost[tid] > update_cost[tid])
     {
         cost[tid] = update_cost[tid];
         mask[tid] = true;
