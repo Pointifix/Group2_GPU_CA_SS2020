@@ -24,8 +24,8 @@ int main()
     //graphio::writePaths("output/path", graph2, paths);
 
     SSSP_Standard standard(graph2);
-    paths = standard.compute(0);
+    paths1 = standard.compute(0);
 
     SSSP_Thrust thrust(graph2);
-    paths = standard.compute(0);
+    paths1 = standard.compute(0);
 }

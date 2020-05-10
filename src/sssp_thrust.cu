@@ -55,10 +55,10 @@ __global__ void SSSP_Kernel2(int* mask, int* cost, int* update_cost, int nodes_a
     update_cost[tid] = cost[tid];
 }
 
-std::vector<std::vector<int>> SSSP_Thrust::compute(int source_node)
+std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
 {
 
-    thrust::host_vector<int> previous_node(graph->edges.size(), -1);
+    thrust::host_vector<int> previous_nodes(graph->edges.size(), -1);
     thrust::host_vector<int> mask(graph->edges.size(), 0);
     thrust::host_vector<int> cost(graph->edges.size(), std::numeric_limits<int>::max());
     thrust::host_vector<int> update_cost(graph->edges.size(), std::numeric_limits<int>::max());
@@ -70,7 +70,7 @@ std::vector<std::vector<int>> SSSP_Thrust::compute(int source_node)
     thrust::device_vector<int> d_edges = graph->edges;
     thrust::device_vector<int> d_destinations = graph->destinations;
     thrust::device_vector<int> d_weights = graph->weights;
-    thrust::device_vector<int> d_previous_node = previous_node;
+    thrust::device_vector<int> d_previous_node = previous_nodes;
     thrust::device_vector<int> d_mask = mask;
     thrust::device_vector<int> d_cost = cost;
     thrust::device_vector<int> d_update_cost;
@@ -95,31 +95,12 @@ std::vector<std::vector<int>> SSSP_Thrust::compute(int source_node)
     }
 
     // no need to clean up vectors as they get de-allocated when they go out of scope
-    previous_node = d_previous_node;
+    previous_nodes = d_previous_node;
     cost = d_cost;
     update_cost = d_update_cost;
 
-    std::cout << "\n\nMask: ";
-    for(int i = 0; i < mask.size(); i++)
-    {
-        std::cout << mask[i] << ",";
-    }
-    std::cout << "\n\nCost: ";
-    for(int i = 0; i < cost.size(); i++)
-    {
-        std::cout << cost[i] << ",";
-    }
-    std::cout << "\n\nUpdateCost: ";
-    for(int i = 0; i < update_cost.size(); i++)
-    {
-        std::cout << update_cost[i] << ",";
-    }
-    std::cout << "\n\nPreviousNode: ";
-    for(int i = 0; i < previous_node.size(); i++)
-    {
-        std::cout << previous_node[i] << ",";
-    }
+    std::vector<int> ret_previous_nodes(previous_nodes.size());
+    thrust::copy(previous_nodes.begin(), previous_nodes.end(), ret_previous_nodes.begin());
 
-    // TODO
-    return nullptr;
+    return std::make_shared<Paths>(Paths(ret_previous_nodes, source_node, graph));
 }
