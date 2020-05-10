@@ -63,3 +63,8 @@ std::vector<int> Paths::getPath(int destination)
 
     return path;
 }
+
+bool Paths::isEqualTo(const Paths* path) {
+    return this->previous_nodes.size() == path->previous_nodes.size() && std::equal(this->previous_nodes.begin(),
+                      this->previous_nodes.begin() + this->previous_nodes.size(), path->previous_nodes.begin());
+}

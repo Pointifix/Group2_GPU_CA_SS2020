@@ -10,7 +10,7 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.01);
+	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(100, 0.05);
 	std::cout << graph->toString();
 	graphio::writeGraph("graph", graph);
 
@@ -24,8 +24,14 @@ int main()
     //graphio::writePaths("output/path", graph2, paths);
 
     SSSP_Standard standard(graph2);
-    paths1 = standard.compute(0);
+    std::shared_ptr<Paths> paths2 = standard.compute(0);
+    std::cout << paths2->toString() << std::endl;
 
     SSSP_Thrust thrust(graph2);
-    paths1 = standard.compute(0);
+    std::shared_ptr<Paths> paths3 = standard.compute(0);
+    std::cout << paths3->toString() << std::endl;
+
+    std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
+    std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
+    std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
 }

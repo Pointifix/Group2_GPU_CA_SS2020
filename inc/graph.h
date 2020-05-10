@@ -40,6 +40,8 @@ public:
 
     std::string toString();
 
+    bool isEqualTo(const Paths* path);
+
     std::vector<int> getPath(int destination);
 };
 
