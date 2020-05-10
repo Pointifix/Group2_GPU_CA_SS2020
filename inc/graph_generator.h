@@ -110,8 +110,8 @@ namespace graphgen {
      * @return connected Graph
      */
     std::shared_ptr<Graph> generateConnectedGraph2(int num_nodes, float density,
-                                                  bool directed = true, int max_weight = 10,
-                                                  unsigned int seed = time(nullptr)) {
+                                                   bool directed = true, int max_weight = 10,
+                                                   unsigned int seed = time(nullptr)) {
         if (num_nodes < 2 || density < 0 || density > 1) {
             return nullptr;
         }

@@ -11,15 +11,14 @@
 
 int main()
 {
-	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(32, 0.04);
-	std::cout << graph->toString();
-	graphio::writeGraph("output/graph", graph);
+	//std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(32, 0.04);
+	//std::cout << graph->toString();
+	//graphio::writeGraph("output/graph", graph);
 
     std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
     std::cout << graph2->toString();
 
-
-    auto adjacencyMatrix = graph2->getAdjacencyMatrix();
+    //auto adjacencyMatrix = graph2->getAdjacencyMatrix();
 
     /*
     std::cout << "Adjacency Matrix:" << std::endl;
