@@ -12,7 +12,7 @@ public:
      * @param graph graph that is used for computations.
      */
     explicit SSSP_Sequential(std::shared_ptr<Graph> graph);
-    std::vector<std::vector<int>> compute(int source_node) override;
+    std::shared_ptr<Paths> compute(int source_node) override;
 };
 
 #endif /* SSSP_Sequential_H */

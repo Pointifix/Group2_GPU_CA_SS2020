@@ -18,7 +18,8 @@ int main()
     std::cout << graph2->toString();
     
     SSSP_Sequential sequ(graph2);
-    std::vector<std::vector<int>> paths = sequ.compute(0);
+    std::shared_ptr<Paths> paths1 = sequ.compute(0);
+    std::cout << paths1->toString() << std::endl;
 
     //graphio::writePaths("output/path", graph2, paths);
 

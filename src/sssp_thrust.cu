@@ -121,5 +121,5 @@ std::vector<std::vector<int>> SSSP_Thrust::compute(int source_node)
     }
 
     // TODO
-    return std::vector<std::vector<int>>();
+    return nullptr;
 }

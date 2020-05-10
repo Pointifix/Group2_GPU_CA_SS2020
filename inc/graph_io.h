@@ -145,13 +145,13 @@ namespace graphio
      * @param filename Name of the file
      * @param shortest_paths shortest path vectors
      */
-    void writePaths(const std::string& filename, const std::shared_ptr<Graph>& graph, const std::vector<std::vector<int>> shortest_paths)
+    void writePaths(const std::string& filename, const std::shared_ptr<Paths> paths)
     {
         std::ofstream stream;
 
-        for(int i = 0; i < shortest_paths.size(); i++)
+        for(int i = 0; i < paths->previous_nodes.size(); i++)
         {
-            stream.open(filename + std::to_string(shortest_paths[i][shortest_paths[i].size()-1]) + file_extension);
+            stream.open(filename + std::to_string(paths->previous_nodes.at(i)) + file_extension);
 
             if (!stream.is_open())
             {
@@ -159,16 +159,18 @@ namespace graphio
                 continue;
             }
 
-            stream << "H " + std::to_string(shortest_paths[i].size()) + " " + std::to_string(shortest_paths[i].size() - 1) + " 0";
+            stream << "H " + std::to_string(paths->previous_nodes.size()) + " " + std::to_string(paths->previous_nodes.size() - 1) + " 0";
 
-            for(int j = 0; j < shortest_paths[i].size() - 1; j++)
+            std::vector<int> path = paths->getPath(i);
+
+            for(int j = 0; j < path.size() - 1; j++)
             {
-                int lastEdgeIndex = graph->destinations.size();
-                if (shortest_paths[i][j] + 1 < graph->edges.size()) lastEdgeIndex = graph->edges.at(shortest_paths[i][j] + 1);
+                int lastEdgeIndex = paths->graph->destinations.size();
+                if (path[j] + 1 < paths->graph->edges.size()) lastEdgeIndex = paths->graph->edges.at(path[j] + 1);
 
-                for(int k = graph->edges.at(shortest_paths[i][j]); k < lastEdgeIndex; k++)
+                for(int k = paths->graph->edges.at(path[j]); k < lastEdgeIndex; k++)
                 {
-                    if (graph->destinations.at(k) == shortest_paths[i][j + 1]) stream << "\nE " + std::to_string(shortest_paths[i][j]) + " " + std::to_string(shortest_paths[i][j + 1]) + " " + std::to_string(graph->weights.at(k));
+                    if (paths->graph->destinations.at(k) == path[j + 1]) stream << "\nE " + std::to_string(path[j]) + " " + std::to_string(path[j + 1]) + " " + std::to_string(paths->graph->weights.at(k));
                 }
             }
 
