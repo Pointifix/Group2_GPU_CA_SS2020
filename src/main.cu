@@ -6,23 +6,26 @@
 #include "sssp.h"
 #include "sssp_sequential.h"
 #include "sssp_standard.h"
+#include "sssp_thrust.h"
 
 int main()
 {
 	std::shared_ptr<Graph> graph = graphgen::generateConnectedGraph(200, 0.01);
-	std::cout << graph->toString() << std::endl;
-	graphio::writeGraph("output/graph", graph);
+	std::cout << graph->toString();
+	graphio::writeGraph("graph", graph);
 
-    std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
-    std::cout << graph2->toString() << std::endl;
+    std::shared_ptr<Graph> graph2 = graphio::readGraph("graph");
+    std::cout << graph2->toString();
     
     SSSP_Sequential sequ(graph2);
     std::shared_ptr<Paths> paths1 = sequ.compute(0);
     std::cout << paths1->toString() << std::endl;
 
-    graphio::writePaths("output/path", paths1);
+    //graphio::writePaths("output/path", graph2, paths);
 
     SSSP_Standard standard(graph2);
-    std::shared_ptr<Paths> paths2 = standard.compute(0);
-    std::cout << paths2->toString() << std::endl;
+    paths1 = standard.compute(0);
+
+    SSSP_Thrust thrust(graph2);
+    paths1 = standard.compute(0);
 }
