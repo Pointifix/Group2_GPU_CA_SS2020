@@ -21,17 +21,21 @@ int main()
     std::shared_ptr<Paths> paths1 = sequ.compute(0);
     std::cout << paths1->toString() << std::endl;
 
-    //graphio::writePaths("output/path", graph2, paths);
+    graphio::writePaths("output/path_sequential", paths1);
 
     SSSP_Standard standard(graph2);
     std::shared_ptr<Paths> paths2 = standard.compute(0);
     std::cout << paths2->toString() << std::endl;
 
+    graphio::writePaths("output/path_standard", paths2);
+
+    /*
     SSSP_Thrust thrust(graph2);
     std::shared_ptr<Paths> paths3 = standard.compute(0);
     std::cout << paths3->toString() << std::endl;
+     */
 
     std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
-    std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
-    std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
+    //std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
+    //std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
 }
