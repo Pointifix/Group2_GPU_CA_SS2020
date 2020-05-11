@@ -14,17 +14,17 @@ Graph::Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vecto
 std::string Graph::toString() {
     std::string builder = "Graph (" + std::to_string(edges.size()) + " vertices, " + std::to_string(destinations.size()) + " edges)";
 
-    builder += "\nEdges:\n";
+    builder += "\nEdges:\n\t";
     for (const auto &edge : edges) {
-        builder += std::to_string(edge) + ", ";
+        builder += std::to_string(edge) + ",\t";
     }
-    builder += "\nDestinations:\n";
+    builder += "\nDestinations:\n\t";
     for (const auto &destination : destinations) {
-        builder += std::to_string(destination) + ", ";
+        builder += std::to_string(destination) + ",\t";
     }
-    builder += "\nWeights:\n";
+    builder += "\nWeights:\n\t";
     for (const auto &weight : weights) {
-        builder += std::to_string(weight) + ", ";
+        builder += std::to_string(weight) + ",\t";
     }
     return builder + "\n";
 }
@@ -55,15 +55,16 @@ Paths::Paths(std::vector<int> &previous_nodes, std::vector<int> &costs, int sour
 std::string Paths::toString() {
     std::string builder = "Paths (Graph with " + std::to_string(graph->edges.size()) + " vertices, " + std::to_string(graph->destinations.size()) + " edges)";
 
-    builder += "\nSource Node:\n" + std::to_string(source_node);
+    builder += "\nSource Node:\n\t" + std::to_string(source_node);
 
-    builder += "\nPrevious Nodes:\n";
+    builder += "\nPrevious Nodes:\n\t";
     for (const auto &previous_node : previous_nodes) {
-        builder += std::to_string(previous_node) + ", ";
+        builder += std::to_string(previous_node) + ",\t";
     }
-    builder += "\nCosts:\n";
+    builder += "\nCosts:\n\t";
     for (const auto &cost : costs) {
-        builder += std::to_string(cost) + ", ";
+        if (cost == std::numeric_limits<int>::max()) builder += "inf,\t";
+        else builder += std::to_string(cost) + ",\t";
     }
     return builder + "\n";
 }
