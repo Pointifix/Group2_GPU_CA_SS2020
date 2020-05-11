@@ -13,7 +13,7 @@ int main()
 {
     srand(time(nullptr));
 
-	std::shared_ptr<Graph> graph = graphgen::generateGraph(1'000, 0.01);
+	std::shared_ptr<Graph> graph = graphgen::generateGraph(1'00, 0.1);
 	std::cout << graph->toString();
 	graphio::writeGraph("output/graph", graph);
 

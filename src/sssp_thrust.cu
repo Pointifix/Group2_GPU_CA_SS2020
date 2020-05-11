@@ -78,9 +78,9 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask.begin(), mask.end(), true) != mask.end())
     {
-        int numBlocks = ceil((double)graph->edges.size() / 1024);
+        int numBlocks = ceil((double)graph->edges.size() / 256);
 
-        dim3 threadsPerBlock(32, 32);
+        dim3 threadsPerBlock(256);
         M_CFUN((SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(
                 thrust::raw_pointer_cast(&d_edges[0]), thrust::raw_pointer_cast(&d_destinations[0]),
                 thrust::raw_pointer_cast(&d_weights[0]), thrust::raw_pointer_cast(&d_previous_node[0]),

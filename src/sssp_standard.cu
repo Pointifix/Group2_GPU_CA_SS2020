@@ -33,15 +33,11 @@ __global__ void CUDA_SSSP_Kernel1(const int* edges, const int* destinations, con
 
             if(update_cost[nid] > cost[tid] + weights[i])
             {
-                int old_cost = update_cost[nid];
                 int new_cost = cost[tid] + weights[i];
 
-                int old = atomicMin(&update_cost[nid], new_cost);
+                atomicMin(&update_cost[nid], new_cost);
 
-                //this is not thread save yet, NEED FIXING
-                //TODO
-                //in fact, much TODO
-                if (old == old_cost) previous_node[nid] = tid;
+                if (update_cost[nid] == new_cost) previous_node[nid] = tid;
             }
         }
     }
@@ -102,9 +98,9 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask.begin(), mask.end(), true) != mask.end())
     {
-        int numBlocks = ceil((double)graph->edges.size() / 1024);
+        int numBlocks = ceil((double)graph->edges.size() / 256);
 
-        dim3 threadsPerBlock(32, 32);
+        dim3 threadsPerBlock(256);
         M_CFUN((CUDA_SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(d_edges, d_destinations, d_weights,
                 d_previous_node, d_mask, d_cost, d_update_cost, graph->edges.size(), graph->destinations.size())));
 

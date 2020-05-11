@@ -88,6 +88,21 @@ std::vector<int> Paths::getPath(int destination)
 }
 
 bool Paths::isEqualTo(const Paths* path) {
-    return this->previous_nodes.size() == path->previous_nodes.size() && std::equal(this->previous_nodes.begin(),
-                      this->previous_nodes.begin() + this->previous_nodes.size(), path->previous_nodes.begin());
+    if (this->previous_nodes.size() != path->previous_nodes.size()) return false;
+
+    std::vector<int> difference;
+
+    for (int i = 0; i < this->previous_nodes.size(); i++)
+    {
+        if (this->previous_nodes.at(i) != path->previous_nodes.at(i)) difference.push_back(i);
+    }
+
+    std::cout << "Difference: " << difference.size() << std::endl;
+
+    for (int i = 0; i < difference.size(); i++)
+    {
+        if (this->costs.at(difference.at(i)) != path->costs.at(difference.at(i))) return false;
+    }
+
+    return true;
 }
