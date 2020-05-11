@@ -10,7 +10,7 @@
 using namespace graphgen;
 using namespace graphio;
 
-constexpr float den(int e, int v, bool directed) {
+constexpr float calculateDensity(int e, int v, bool directed) {
     return (float)(directed ? 1 : 2) * (float)e / ((float)v * ((float)v - 1));
 }
 
@@ -43,22 +43,22 @@ TEST_CASE("Graph Generator simple graph") {
     CHECK(g->destinations.size() == 90);
     CHECK(g->weights.size() == 90);
 
-    g = generateConnectedGraph(10, den(5, 10, true), true);
+    g = generateConnectedGraph(10, calculateDensity(5, 10, true), true);
     CHECK(g->edges.size() == 10);
     CHECK(g->destinations.size() == 5);
     CHECK(g->weights.size() == 5);
 
-    g = generateConnectedGraph(10, den(5, 10, false), false);
+    g = generateConnectedGraph(10, calculateDensity(5, 10, false), false);
     CHECK(g->edges.size() == 10);
     CHECK(g->destinations.size() == 5);
     CHECK(g->weights.size() == 5);
 
-    g = generateConnectedGraph(1000, den(700, 1000, true), true);
+    g = generateConnectedGraph(1000, calculateDensity(700, 1000, true), true);
     CHECK(g->edges.size() == 1000);
     CHECK(g->destinations.size() == 700);
     CHECK(g->weights.size() == 700);
 
-    g = generateConnectedGraph(1000, den(300, 1000, false), false);
+    g = generateConnectedGraph(1000, calculateDensity(300, 1000, false), false);
     CHECK(g->edges.size() == 1000);
     CHECK(g->destinations.size() == 300);
     CHECK(g->weights.size() == 300);
@@ -66,21 +66,21 @@ TEST_CASE("Graph Generator simple graph") {
 
 TEST_CASE("Test graph IO") {
     SECTION("Small normal graph") {
-        std::vector<uint> edges {0, 2, 5, 6, 7};
-        std::vector<uint> destinations {1, 2, 0, 3, 4, 1, 4, 2};
-        std::vector<uint> weights {6, 1, 5, 3, 8, 2, 4, 1};
-        Graph graph = Graph(edges, destinations, weights);
+        std::vector<int> edges {0, 2, 5, 6, 7};
+        std::vector<int> destinations {1, 2, 0, 3, 4, 1, 4, 2};
+        std::vector<int> weights {6, 1, 5, 3, 8, 2, 4, 1};
+        std::shared_ptr<Graph> graph = std::make_shared<Graph>(edges, destinations, weights);
 
         // First read a graph from disk
-        auto graph2 = readGraph("test/res/graph_small_normal.txt"); // This file describes the same graph as 'graph' and 'ss'
-        REQUIRE(graph2->edges == graph.edges);
-        REQUIRE(graph2->destinations == graph.destinations);
-        REQUIRE(graph2->weights == graph.weights);
+        auto graph2 = readGraph("test/graph_small_normal"); // This file describes the same graph as 'graph' and 'ss'
+        REQUIRE(graph2->edges == graph->edges);
+        REQUIRE(graph2->destinations == graph->destinations);
+        REQUIRE(graph2->weights == graph->weights);
 
-        writeGraph("test/res/test_temp", graph2);
-        graph2 = readGraph("test/res/test_temp");
-        REQUIRE(graph2->edges == graph.edges);
-        REQUIRE(graph2->destinations == graph.destinations);
-        REQUIRE(graph2->weights == graph.weights);
+        writeGraph("test/test_temp", graph2);
+        graph2 = readGraph("test/test_temp");
+        REQUIRE(graph2->edges == graph->edges);
+        REQUIRE(graph2->destinations == graph->destinations);
+        REQUIRE(graph2->weights == graph->weights);
     }
 }

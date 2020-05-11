@@ -13,7 +13,7 @@ int main()
 {
     srand(time(nullptr));
 
-	std::shared_ptr<Graph> graph = graphgen::generateGraph(1'00, 0.1);
+	std::shared_ptr<Graph> graph = graphgen::generateGraph(100, 0.1);
 	std::cout << graph->toString();
 	graphio::writeGraph("output/graph", graph);
 
@@ -34,7 +34,7 @@ int main()
     }
      */
 
-    int random_source = rand() % graph2->edges.size();
+    int random_source = 0; //rand() % graph2->edges.size();
 
     SSSP_Sequential sequ(graph2);
     std::shared_ptr<Paths> paths1 = sequ.compute(random_source);

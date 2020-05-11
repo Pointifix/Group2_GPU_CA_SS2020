@@ -4,6 +4,7 @@
 #include "sssp.h"
 
 class SSSP_Zero_Copy_Memory : public SSSP {
+public:
     /**
      * Instance of a SSSP for computation using zero copy memory on CUDA.
      * @param graph graph that is used for computations.

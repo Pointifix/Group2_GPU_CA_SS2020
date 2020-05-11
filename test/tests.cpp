@@ -3,3 +3,4 @@
 
 #include "test_alg.cuh"
 #include "test_graph.hpp"
+#include "test_sssp.hpp"
