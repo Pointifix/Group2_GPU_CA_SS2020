@@ -14,7 +14,7 @@ __device__ int getGlobalIdx_3D_3D(){
 }
 
 __global__ void CUDA_SSSP_Kernel1(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
-        const int* cost, int* update_cost, int nodes_amount, int edges_amount)
+        const int* cost, int nodes_amount, int edges_amount)
 {
     int tid = getGlobalIdx_3D_3D();
 
@@ -31,43 +31,31 @@ __global__ void CUDA_SSSP_Kernel1(const int* edges, const int* destinations, con
         {
             int nid = destinations[i];
 
-            if(update_cost[nid] > cost[tid] + weights[i])
+            if(cost[nid] > cost[tid] + weights[i])
             {
                 int new_cost = cost[tid] + weights[i];
 
-                atomicMin(&update_cost[nid], new_cost);
+                atomicMin((int*)&cost[nid], new_cost);
 
-                if (update_cost[nid] == new_cost) previous_node[nid] = tid;
+                if (cost[nid] == new_cost)
+                {
+                    previous_node[nid] = tid;
+                    mask[nid] = true;
+                }
+
             }
         }
     }
-}
-
-__global__ void CUDA_SSSP_Kernel2(int* mask, int* cost, int* update_cost, int nodes_amount)
-{
-    int tid = getGlobalIdx_3D_3D();
-
-    if (tid >= nodes_amount) return;
-
-    if (cost[tid] > update_cost[tid])
-    {
-        cost[tid] = update_cost[tid];
-        mask[tid] = true;
-    }
-
-    update_cost[tid] = cost[tid];
 }
 
 std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
 {
     std::vector<int> previous_nodes(graph->edges.size(), -1);
     std::vector<int> mask(graph->edges.size(), 0);
-    std::vector<int> cost(graph->edges.size(), std::numeric_limits<int>::max()), update_cost(graph->edges.size(),
-            std::numeric_limits<int>::max());
+    std::vector<int> cost(graph->edges.size(), std::numeric_limits<int>::max());
 
     mask.at(source_node) = true;
     cost.at(source_node) = 0;
-    update_cost.at(source_node) = 0;
 
     int *d_edges = nullptr;
     int *d_destinations = nullptr;
@@ -75,7 +63,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     int *d_previous_node = nullptr;
     int *d_mask = nullptr;
     int *d_cost = nullptr;
-    int *d_update_cost = nullptr;
 
     M_C(cudaMalloc((void**) &d_edges,          graph->edges.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_destinations,   graph->destinations.size() * sizeof(int)));
@@ -84,7 +71,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     M_C(cudaMalloc((void**) &d_previous_node, previous_nodes.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_mask, mask.size() * sizeof(int)));
     M_C(cudaMalloc((void**) &d_cost, cost.size() * sizeof(int)));
-    M_C(cudaMalloc((void**) &d_update_cost, update_cost.size() * sizeof(int)));
 
     M_C(cudaMemcpy(d_edges,        &graph->edges[0],        graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(int),   cudaMemcpyHostToDevice));
@@ -93,7 +79,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     M_C(cudaMemcpy(d_previous_node,&previous_nodes[0],  previous_nodes.size() * sizeof(int),cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_mask,         &mask[0],            mask.size() * sizeof(int),          cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_cost,         &cost[0],            cost.size() * sizeof(int),          cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_update_cost,  &update_cost[0],     update_cost.size() * sizeof(int),   cudaMemcpyHostToDevice));
 
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask.begin(), mask.end(), true) != mask.end())
@@ -102,9 +87,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
 
         dim3 threadsPerBlock(256);
         M_CFUN((CUDA_SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(d_edges, d_destinations, d_weights,
-                d_previous_node, d_mask, d_cost, d_update_cost, graph->edges.size(), graph->destinations.size())));
-
-        M_CFUN((CUDA_SSSP_Kernel2<<<numBlocks, threadsPerBlock>>>(d_mask, d_cost, d_update_cost, graph->edges.size())));
+                d_previous_node, d_mask, d_cost, graph->edges.size(), graph->destinations.size())));
 
         //copy back mask
         M_C(cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost));
@@ -112,7 +95,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
 
     M_C(cudaMemcpy(&previous_nodes[0], d_previous_node, previous_nodes.size() * sizeof(int), cudaMemcpyDeviceToHost));
     M_C(cudaMemcpy(&cost[0], d_cost, cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
-    M_C(cudaMemcpy(&update_cost[0], d_update_cost, update_cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
 
     M_C(cudaFree(d_edges));
     M_C(cudaFree(d_destinations));
@@ -120,7 +102,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     M_C(cudaFree(d_previous_node));
     M_C(cudaFree(d_mask));
     M_C(cudaFree(d_cost));
-    M_C(cudaFree(d_update_cost));
 
     std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, cost, source_node, graph));
 

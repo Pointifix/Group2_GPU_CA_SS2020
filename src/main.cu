@@ -37,23 +37,23 @@ int main()
         std::shared_ptr<Paths> paths1 = sequ.compute(random_source);
         time_measurement::endMeasurement("SSSP Sequential");
 
-        graphio::writePaths("output/path_sequential", paths1);
+        //graphio::writePaths("output/path_sequential", paths1);
 
         SSSP_Standard standard(graph);
         time_measurement::startMeasurement("SSSP Standard");
         std::shared_ptr<Paths> paths2 = standard.compute(random_source);
         time_measurement::endMeasurement("SSSP Standard");
 
-        graphio::writePaths("output/path_standard", paths2);
+        //graphio::writePaths("output/path_standard", paths2);
 
         SSSP_Thrust thrust(graph);
         time_measurement::startMeasurement("SSSP Thrust");
         std::shared_ptr<Paths> paths3 = standard.compute(random_source);
         time_measurement::endMeasurement("SSSP Thrust");
 
-        //std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
-        //std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
-        //std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
+        std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
+        std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
+        std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
 
         std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
 

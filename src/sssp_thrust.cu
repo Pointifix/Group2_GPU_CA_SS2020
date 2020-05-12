@@ -14,7 +14,7 @@ __device__ int getGlobalIdx_3D_3DT(){
 }
 
 __global__ void SSSP_Kernel1(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
-                             const int* cost, int* update_cost, int nodes_amount, int edges_amount)
+                             const int* cost, int nodes_amount, int edges_amount)
 {
     int tid = getGlobalIdx_3D_3DT();
 
@@ -31,28 +31,21 @@ __global__ void SSSP_Kernel1(const int* edges, const int* destinations, const in
         {
             int nid = destinations[i];
 
-            if(update_cost[nid] > cost[tid] + weights[i])
+            if(cost[nid] > cost[tid] + weights[i])
             {
-                update_cost[nid] = cost[tid] + weights[i];
-                previous_node[nid] = tid;
+                int new_cost = cost[tid] + weights[i];
+
+                atomicMin((int*)&cost[nid], new_cost);
+
+                if (cost[nid] == new_cost)
+                {
+                    previous_node[nid] = tid;
+                    mask[nid] = true;
+                }
+
             }
         }
     }
-}
-
-__global__ void SSSP_Kernel2(int* mask, int* cost, int* update_cost, int nodes_amount)
-{
-    int tid = getGlobalIdx_3D_3DT();
-
-    if (tid >= nodes_amount) return;
-
-    if(cost[tid] > update_cost[tid])
-    {
-        cost[tid] = update_cost[tid];
-        mask[tid] = true;
-    }
-
-    update_cost[tid] = cost[tid];
 }
 
 std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
@@ -61,11 +54,9 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
     thrust::host_vector<int> previous_nodes(graph->edges.size(), -1);
     thrust::host_vector<int> mask(graph->edges.size(), 0);
     thrust::host_vector<int> cost(graph->edges.size(), std::numeric_limits<int>::max());
-    thrust::host_vector<int> update_cost(graph->edges.size(), std::numeric_limits<int>::max());
 
     mask[source_node] = true;
     cost[source_node] = 0;
-    update_cost[source_node] = 0;
 
     thrust::device_vector<int> d_edges = graph->edges;
     thrust::device_vector<int> d_destinations = graph->destinations;
@@ -73,7 +64,6 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
     thrust::device_vector<int> d_previous_node = previous_nodes;
     thrust::device_vector<int> d_mask = mask;
     thrust::device_vector<int> d_cost = cost;
-    thrust::device_vector<int> d_update_cost;
 
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask.begin(), mask.end(), true) != mask.end())
@@ -84,11 +74,7 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
         M_CFUN((SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(
                 thrust::raw_pointer_cast(&d_edges[0]), thrust::raw_pointer_cast(&d_destinations[0]),
                 thrust::raw_pointer_cast(&d_weights[0]), thrust::raw_pointer_cast(&d_previous_node[0]),
-                thrust::raw_pointer_cast(&d_mask[0]), thrust::raw_pointer_cast(&d_cost[0]),
-                thrust::raw_pointer_cast(&d_update_cost[0]), graph->edges.size(), graph->destinations.size())));
-
-        M_CFUN((SSSP_Kernel2<<<numBlocks, threadsPerBlock>>>(thrust::raw_pointer_cast(&d_mask[0]),
-                thrust::raw_pointer_cast(&d_cost[0]), thrust::raw_pointer_cast(&d_update_cost[0]), graph->edges.size())));
+                thrust::raw_pointer_cast(&d_mask[0]), thrust::raw_pointer_cast(&d_cost[0]), graph->edges.size(), graph->destinations.size())));
 
         //copy back mask
         mask = d_mask;
@@ -97,7 +83,6 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
     // no need to clean up vectors as they get de-allocated when they go out of scope
     previous_nodes = d_previous_node;
     cost = d_cost;
-    update_cost = d_update_cost;
 
     std::vector<int> ret_previous_nodes(previous_nodes.size());
     thrust::copy(previous_nodes.begin(), previous_nodes.end(), ret_previous_nodes.begin());
