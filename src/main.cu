@@ -14,10 +14,12 @@ int main()
 {
     srand(time(nullptr));
 
-    for (int i = 10; i <= 100000; i *= 10)
+    for (int i = 1; i <= 5; i++)
     {
+        int nodes = pow(10, i);
+
         time_measurement::startMeasurement("Graph Generation");
-        std::shared_ptr<Graph> graph = graphgen::generateGraph(i, graphgen::calculateDensity(i * 5, i, true));
+        std::shared_ptr<Graph> graph = graphgen::generateGraph(nodes, graphgen::calculateDensity(nodes * 5, nodes, true));
         time_measurement::endMeasurement("Graph Generation");
 
         /*
@@ -56,7 +58,6 @@ int main()
         //std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
 
         std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
-
-        time_measurement::printMeasurements();
     }
+    time_measurement::printMeasurements();
 }
