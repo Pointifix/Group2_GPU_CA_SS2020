@@ -8,52 +8,55 @@
 #include "sssp_sequential.h"
 #include "sssp_standard.h"
 #include "sssp_thrust.h"
+#include "time_measurement.h"
 
 int main()
 {
     srand(time(nullptr));
 
-	std::shared_ptr<Graph> graph = graphgen::generateGraph(100, 0.1);
-	std::cout << graph->toString();
-	graphio::writeGraph("output/graph", graph);
-
-    std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
-    std::cout << graph2->toString();
-
-    //auto adjacencyMatrix = graph2->getAdjacencyMatrix();
-
-    /*
-    std::cout << "Adjacency Matrix:" << std::endl;
-    for(int i = 0; i < graph2->edges.size(); i++)
+    for (int i = 10; i <= 100000; i *= 10)
     {
-        for(int j = 0; j < graph2->edges.size(); j++)
-        {
-            std::cout << adjacencyMatrix[i][j] << ", ";
-        }
-        std::cout << std::endl;
+        time_measurement::startMeasurement("Graph Generation");
+        std::shared_ptr<Graph> graph = graphgen::generateGraph(i, graphgen::calculateDensity(i * 5, i, true));
+        time_measurement::endMeasurement("Graph Generation");
+
+        /*
+        time_measurement::startMeasurement("Graph Output");
+        graphio::writeGraph("output/graph", graph);
+        time_measurement::endMeasurement("Graph Output");
+
+        time_measurement::startMeasurement("Graph Input");
+        std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
+        time_measurement::endMeasurement("Graph Input");
+         */
+
+        int random_source = rand() % graph->edges.size();
+
+        SSSP_Sequential sequ(graph);
+        time_measurement::startMeasurement("SSSP Sequential");
+        std::shared_ptr<Paths> paths1 = sequ.compute(random_source);
+        time_measurement::endMeasurement("SSSP Sequential");
+
+        graphio::writePaths("output/path_sequential", paths1);
+
+        SSSP_Standard standard(graph);
+        time_measurement::startMeasurement("SSSP Standard");
+        std::shared_ptr<Paths> paths2 = standard.compute(random_source);
+        time_measurement::endMeasurement("SSSP Standard");
+
+        graphio::writePaths("output/path_standard", paths2);
+
+        SSSP_Thrust thrust(graph);
+        time_measurement::startMeasurement("SSSP Thrust");
+        std::shared_ptr<Paths> paths3 = standard.compute(random_source);
+        time_measurement::endMeasurement("SSSP Thrust");
+
+        //std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
+        //std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
+        //std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
+
+        std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
+
+        time_measurement::printMeasurements();
     }
-     */
-
-    int random_source = 0; //rand() % graph2->edges.size();
-
-    SSSP_Sequential sequ(graph2);
-    std::shared_ptr<Paths> paths1 = sequ.compute(random_source);
-    std::cout << paths1->toString() << std::endl;
-
-    graphio::writePaths("output/path_sequential", paths1);
-
-    std::cout << "Standard SSSP" << std::endl;
-    SSSP_Standard standard(graph2);
-    std::shared_ptr<Paths> paths2 = standard.compute(random_source);
-    std::cout << paths2->toString() << std::endl;
-
-    graphio::writePaths("output/path_standard", paths2);
-
-    SSSP_Thrust thrust(graph2);
-    std::shared_ptr<Paths> paths3 = standard.compute(random_source);
-    std::cout << paths3->toString() << std::endl;
-
-    std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
-    std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
-    std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
 }

@@ -9,7 +9,12 @@
 #include <list>
 
 #include "graph.h"
+
 namespace graphgen {
+    constexpr float calculateDensity(int e, int v, bool directed) {
+        return (float)(directed ? 1 : 2) * (float)e / ((float)v * ((float)v - 1));
+    }
+
     /**
      * Generates a connected Graph with given number of nodes and density, if the density is too small for the graph to be weakly connected it return a disconnected graph.
      * @param num_nodes Number of nodes

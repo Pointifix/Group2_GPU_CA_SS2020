@@ -10,10 +10,6 @@
 using namespace graphgen;
 using namespace graphio;
 
-constexpr float calculateDensity(int e, int v, bool directed) {
-    return (float)(directed ? 1 : 2) * (float)e / ((float)v * ((float)v - 1));
-}
-
 TEST_CASE("Graph Generator simple constraints") {
     CHECK_FALSE(generateConnectedGraph(-1, 1));
     CHECK_FALSE(generateConnectedGraph(0, 1.0001));

@@ -24,7 +24,7 @@ public:
 
     std::string toString();
 
-    std::vector<std::vector<int>> getAdjacencyMatrix();
+    std::vector<std::vector<int>> printAdjacencyMatrix();
 };
 
 class Paths {
