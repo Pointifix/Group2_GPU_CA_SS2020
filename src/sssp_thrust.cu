@@ -3,51 +3,6 @@
 SSSP_Thrust::SSSP_Thrust(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
 }
 
-
-__device__ int getGlobalIdx_3D_3DT(){
-    int blockId = blockIdx.x + blockIdx.y * gridDim.x
-                  + gridDim.x * gridDim.y * blockIdx.z;
-    int threadId = blockId * (blockDim.x * blockDim.y * blockDim.z)
-                   + (threadIdx.z * (blockDim.x * blockDim.y))
-                   + (threadIdx.y * blockDim.x) + threadIdx.x;
-    return threadId;
-}
-
-__global__ void SSSP_Kernel1(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
-                             const int* cost, int nodes_amount, int edges_amount)
-{
-    int tid = getGlobalIdx_3D_3DT();
-
-    if (tid >= nodes_amount) return;
-
-    if (mask[tid])
-    {
-        int first = edges[tid];
-        int last = (tid + 1 < nodes_amount) ? edges[tid + 1] : edges_amount;
-
-        mask[tid] = false;
-
-        for (int i = first; i < last; i++)
-        {
-            int nid = destinations[i];
-
-            if(cost[nid] > cost[tid] + weights[i])
-            {
-                int new_cost = cost[tid] + weights[i];
-
-                atomicMin((int*)&cost[nid], new_cost);
-
-                if (cost[nid] == new_cost)
-                {
-                    previous_node[nid] = tid;
-                    mask[nid] = true;
-                }
-
-            }
-        }
-    }
-}
-
 std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
 {
 
@@ -71,7 +26,7 @@ std::shared_ptr<Paths> SSSP_Thrust::compute(int source_node)
         int numBlocks = ceil((double)graph->edges.size() / 256);
 
         dim3 threadsPerBlock(256);
-        M_CFUN((SSSP_Kernel1<<<numBlocks, threadsPerBlock>>>(
+        M_CFUN((alg::SSSP_Kernel<<<numBlocks, threadsPerBlock>>>(
                 thrust::raw_pointer_cast(&d_edges[0]), thrust::raw_pointer_cast(&d_destinations[0]),
                 thrust::raw_pointer_cast(&d_weights[0]), thrust::raw_pointer_cast(&d_previous_node[0]),
                 thrust::raw_pointer_cast(&d_mask[0]), thrust::raw_pointer_cast(&d_cost[0]), graph->edges.size(), graph->destinations.size())));

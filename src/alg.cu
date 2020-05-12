@@ -3,6 +3,51 @@
 
 namespace alg {
 
+    //https://cs.calvin.edu/courses/cs/374/CUDA/CUDA-Thread-Indexing-Cheatsheet.pdf
+    __device__ int getGlobalIdx_3D_3D(){
+        int blockId = blockIdx.x + blockIdx.y * gridDim.x
+                      + gridDim.x * gridDim.y * blockIdx.z;
+        int threadId = blockId * (blockDim.x * blockDim.y * blockDim.z)
+                       + (threadIdx.z * (blockDim.x * blockDim.y))
+                       + (threadIdx.y * blockDim.x) + threadIdx.x;
+        return threadId;
+    }
+
+    __global__ void SSSP_Kernel(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
+                                const int* cost, int nodes_amount, int edges_amount)
+    {
+        int tid = getGlobalIdx_3D_3D();
+
+        if (tid >= nodes_amount) return;
+
+        if (mask[tid])
+        {
+            int first = edges[tid];
+            int last = (tid + 1 < nodes_amount) ? edges[tid + 1] : edges_amount;
+
+            mask[tid] = false;
+
+            for (int i = first; i < last; i++)
+            {
+                int nid = destinations[i];
+
+                if(cost[nid] > cost[tid] + weights[i])
+                {
+                    int new_cost = cost[tid] + weights[i];
+
+                    atomicMin((int*)&cost[nid], new_cost);
+
+                    if (cost[nid] == new_cost)
+                    {
+                        previous_node[nid] = tid;
+                        mask[nid] = true;
+                    }
+
+                }
+            }
+        }
+    }
+
     void countoccur_seq(const std::vector<uint> &a, std::vector<uint> &out) {
         for (uint v : a) {
             out[v]++;

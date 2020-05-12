@@ -12,6 +12,7 @@ public:
      */
     explicit SSSP(std::shared_ptr<Graph> graph) : graph(std::move(graph)) {};
     virtual std::shared_ptr<Paths> compute(int source_node) = 0;
+
 protected:
     std::shared_ptr<Graph> graph;
 };

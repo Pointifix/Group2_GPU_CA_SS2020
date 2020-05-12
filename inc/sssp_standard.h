@@ -4,6 +4,7 @@
 #include "sssp.h"
 
 #include "common.cuh"
+#include "alg.cuh"
 
 #include <iostream>
 #include <limits>

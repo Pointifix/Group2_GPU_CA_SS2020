@@ -6,6 +6,7 @@
 #include <thrust/host_vector.h>
 #include <thrust/device_vector.h>
 #include "common.cuh"
+#include "alg.cuh"
 #include "graph.h"
 
 class SSSP_Thrust : public SSSP {

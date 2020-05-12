@@ -7,6 +7,12 @@ using uint = unsigned int;
 
 namespace alg {
 
+    //https://cs.calvin.edu/courses/cs/374/CUDA/CUDA-Thread-Indexing-Cheatsheet.pdf
+    __device__ int getGlobalIdx_3D_3D();
+
+    __global__ void SSSP_Kernel(const int* edges, const int* destinations, const int* weights, int* previous_node, int* mask,
+                                const int* cost, int nodes_amount, int edges_amount);
+
     /**
      * @param a Vector that will be filled
      * @param firstValue Value that will be in a[0]

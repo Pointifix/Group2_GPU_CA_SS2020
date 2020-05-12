@@ -1,6 +1,7 @@
 #include <iostream>
 #include <chrono>
 
+#include "alg.cuh"
 #include "graph.h"
 #include "graph_generator.h"
 #include "graph_io.h"
@@ -14,7 +15,7 @@ int main()
 {
     srand(time(nullptr));
 
-    for (int i = 1; i <= 5; i++)
+    for (int i = 1; i <= 7; i++)
     {
         int nodes = pow(10, i);
 
