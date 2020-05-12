@@ -10,12 +10,13 @@
 #include "sssp_standard.h"
 #include "sssp_thrust.h"
 #include "time_measurement.h"
+#include "sssp_pinned_memory.h"
 
 int main()
 {
     srand(time(nullptr));
 
-    for (int i = 1; i <= 5; i++)
+    for (int i = 1; i <= 2; i++)
     {
         int nodes = pow(10, i);
 
@@ -54,9 +55,15 @@ int main()
         std::shared_ptr<Paths> paths3 = standard.compute(random_source);
         time_measurement::endMeasurement("SSSP Thrust");
 
+        SSSP_Pinned_Memory pinned(graph);
+        time_measurement::startMeasurement("SSSP Pinned");
+        std::shared_ptr<Paths> paths4 = pinned.compute(random_source);
+        time_measurement::endMeasurement("SSSP Pinned");
+
         std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
         std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
         std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
+        std::cout << "path 1 and 4 same? " << paths1->isEqualTo(paths4.get()) << std::endl;
 
         std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
     }
