@@ -8,17 +8,24 @@ SSSP_Pinned_Memory::SSSP_Pinned_Memory(std::shared_ptr<Graph> graph) : SSSP(std:
 
 std::shared_ptr<Paths> SSSP_Pinned_Memory::compute(int source_node)
 {
-    int* previous_nodes;
-    int* mask;
-    int* cost;
+    int* previous_nodes = nullptr;
+    int* mask = nullptr;
+    int* cost = nullptr;
 
     M_C(cudaMallocHost((int**) &previous_nodes, graph->edges.size() * sizeof(int)));
     M_C(cudaMallocHost((int**) &mask, graph->edges.size() * sizeof(int)));
     M_C(cudaMallocHost((int**) &cost, graph->edges.size() * sizeof(int)));
 
-    memset(previous_nodes, -1, graph->edges.size());
-    memset(mask, 0, graph->edges.size());
-    memset(cost, std::numeric_limits<int>::max(), graph->edges.size());
+    //https://stackoverflow.com/questions/15947969/memset-an-int-16-bit-array-to-shorts-max-value
+    //memset(previous_nodes, -1, graph->edges.size() * sizeof(int));
+    memset(mask, 0, graph->edges.size() * sizeof(int));
+    //memset(cost, std::numeric_limits<int>::max(), graph->edges.size() * sizeof(int));
+
+    for (int i = 0; i < graph->edges.size(); i++)
+    {
+        cost[i] = std::numeric_limits<int>::max();
+        previous_nodes[i] = -1;
+    }
 
     mask[source_node] = 1;
     cost[source_node] = 0;
@@ -42,14 +49,9 @@ std::shared_ptr<Paths> SSSP_Pinned_Memory::compute(int source_node)
     M_C(cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(int),   cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_weights,      &graph->weights[0],      graph->weights.size() * sizeof(int),        cudaMemcpyHostToDevice));
 
-    M_C(cudaMemcpy(d_previous_node,&previous_nodes[0],  graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_mask,         &mask[0],            graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_cost,         &cost[0],            graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
-
-    for(int i = 0; i < graph->edges.size(); i++)
-    {
-        std::cout << mask[i] << ",";
-    }
+    M_C(cudaMemcpy(d_previous_node,previous_nodes,  graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_mask,         mask,            graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_cost,         cost,            graph->edges.size() * sizeof(int),          cudaMemcpyHostToDevice));
 
     // while we still find false in the mask (Ma not empty)
     while (std::find(mask, mask + graph->edges.size(), true) != mask + graph->edges.size())
@@ -64,8 +66,8 @@ std::shared_ptr<Paths> SSSP_Pinned_Memory::compute(int source_node)
         M_C(cudaMemcpy(mask, d_mask, graph->edges.size() * sizeof(int), cudaMemcpyDeviceToHost));
     }
 
-    M_C(cudaMemcpy(&previous_nodes[0], d_previous_node, graph->edges.size() * sizeof(int), cudaMemcpyDeviceToHost));
-    M_C(cudaMemcpy(&cost[0], d_cost, graph->edges.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(previous_nodes, d_previous_node, graph->edges.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(cost, d_cost, graph->edges.size() * sizeof(int), cudaMemcpyDeviceToHost));
 
     M_C(cudaFree(d_edges));
     M_C(cudaFree(d_destinations));
