@@ -16,7 +16,7 @@ int main()
 {
     srand(time(nullptr));
 
-    for (int i = 1; i <= 2; i++)
+    for (int i = 1; i <= 7; i++)
     {
         int nodes = pow(10, i);
 
@@ -34,7 +34,7 @@ int main()
         time_measurement::endMeasurement("Graph Input");
          */
 
-        int random_source = rand() % graph->edges.size();
+        int random_source = rand() % nodes;
 
         SSSP_Sequential sequ(graph);
         time_measurement::startMeasurement("SSSP Sequential");
