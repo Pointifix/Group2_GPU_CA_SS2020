@@ -1,6 +1,8 @@
 #ifndef GRAPH_H
 #define GRAPH_H
 
+#include "common.cuh"
+
 #include <utility>
 #include <vector>
 #include <string>
@@ -16,15 +18,15 @@ public:
      * @param destinations
      * @param weights
      */
-    Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights);
+    Graph(std::vector<pos_t> &edges, std::vector<pos_t> &destinations, std::vector<weight_t> &weights);
 
-    std::vector<int> edges;
-    std::vector<int> destinations;
-    std::vector<int> weights;
+    std::vector<pos_t> edges;
+    std::vector<pos_t> destinations;
+    std::vector<weight_t> weights;
 
     std::string toString();
 
-    std::vector<std::vector<int>> printAdjacencyMatrix();
+    std::vector<std::vector<weight_t>> printAdjacencyMatrix();
 };
 
 class Paths {
@@ -35,18 +37,18 @@ public:
      * @param source_node
      * @param graph
      */
-    Paths(std::vector<int> &previous_nodes, std::vector<int> &costs, int source_node, std::shared_ptr<Graph> graph);
+    Paths(std::vector<pos_t> &previous_nodes, std::vector<weight_t> &costs, pos_t source_node, std::shared_ptr<Graph> graph);
 
-    std::vector<int>costs;
-    std::vector<int>previous_nodes;
-    int source_node;
+    std::vector<weight_t>costs;
+    std::vector<pos_t>previous_nodes;
+    pos_t source_node;
     std::shared_ptr<Graph> graph;
 
     std::string toString();
 
     bool isEqualTo(const Paths* path);
 
-    std::vector<int> getPath(int destination);
+    std::vector<pos_t> getPath(pos_t destination);
 };
 
 #endif /* GRAPH_H */

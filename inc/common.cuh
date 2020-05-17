@@ -3,9 +3,17 @@
 
 #define M_BLOCKSIZE 256
 using uint = unsigned int;
+using pos_t = int;
 using mask_t = bool;
-using data_t = int;
-static constexpr data_t M_INVALID = -1;
+using weight_t = int;
+static constexpr pos_t M_INVALID_POSITION = -1;
+static constexpr mask_t M_MASK_TRUE = true;
+static constexpr mask_t M_MASK_FALSE = false;
+
+#define M_RUNTIME_ERROR(errmsg) { \
+    fprintf(stderr, "RUNTIME ERROR \"%s\" (%s, line %i)\n", #errmsg, __FILE__, __LINE__); \
+    std::terminate(); \
+} while(0)
 
 #ifdef DEBUG
 

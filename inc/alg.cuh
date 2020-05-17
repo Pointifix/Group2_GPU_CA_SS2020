@@ -9,8 +9,8 @@ using uint = unsigned int;
 
 namespace alg {
 
-    __global__ void SSSP_Kernel(const data_t* edges, const data_t* destinations, const data_t* weights,
-                                data_t* previous_node, bool* mask, data_t* cost,
+    __global__ void SSSP_Kernel(const pos_t* edges, const pos_t* destinations, const weight_t * weights,
+                                pos_t *previous_node, mask_t *mask, weight_t *cost,
                                 size_t nodes_amount, size_t edges_amount);
 
     /**
@@ -21,7 +21,7 @@ namespace alg {
     void fill_parcu(T *d_a, size_t Na, T value);
 
     template<class T>
-    void set_parcu(T *d_a, size_t position, T value);
+    void set_parcu(T *d_a, pos_t position, T value);
 
 }
 
