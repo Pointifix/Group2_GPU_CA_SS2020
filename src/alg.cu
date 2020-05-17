@@ -58,6 +58,10 @@ namespace alg {
         M_CFUN((_fill_parcu<T><<< 1, 1 >>>(&d_a[position], 1, value)));
     }
 
+    // -----------------------------------------------------------------------------------------------------------------
+    // TEMPLATES
+    // -----------------------------------------------------------------------------------------------------------------
+
     template void fill_parcu(bool *d_a, size_t Na, bool value);
     template void fill_parcu(int *d_a, size_t Na, int value);
 

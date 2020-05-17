@@ -44,10 +44,10 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
         case CPU:
         default:
             if (m_memType == ZERO_COPY) {
-                //M_C(cudaHostAlloc(&mask, sizeMask, cudaHostAllocMapped));
-                //cudaHostGetDevicePointer(&d_mask, mask, 0);
+                M_C(cudaHostAlloc(&mask, sizeMask, cudaHostAllocMapped));
+                cudaHostGetDevicePointer(&d_mask, mask, 0);
             } else if (m_memType == PINNED) {
-                //M_C(cudaMallocHost((void **) &mask, sizeMask));
+                M_C(cudaMallocHost((void **) &mask, sizeMask));
             } else { // including memType NORMAL
                 mask = new bool[numNodes];
             }
