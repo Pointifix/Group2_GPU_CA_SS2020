@@ -84,7 +84,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     alg::set_parcu(d_cost, source_node, 0);
 
     // while we still find true in the mask (Ma not empty)
-    while (maskContainsTrue())
+    do
     {
         int numBlocks = ceil((double)graph->edges.size() / M_BLOCKSIZE);
 
@@ -96,6 +96,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
             M_C(cudaMemcpy(mask, d_mask, sizeMask, cudaMemcpyDeviceToHost));
         }
     }
+    while (maskContainsTrue());
 
     std::vector<pos_t> previous_nodes(numNodes);
     std::vector<weight_t> cost(numNodes);
