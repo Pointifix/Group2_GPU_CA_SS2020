@@ -2,16 +2,6 @@
 
 SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph, MemoryType memType, SearchType searchType) :
     SSSP(std::move(graph)), m_memType(memType), m_searchType(searchType) {
-
-    // Source: https://arrayfire.com/zero-copy-on-tegra-k1/
-    if (m_memType == ZERO_COPY) {
-        cudaDeviceProp prop{};
-        cudaGetDeviceProperties(&prop, 0);
-        if (!prop.canMapHostMemory) {
-            M_RUNTIME_ERROR("Zero copy memory not supported by the GPU");
-        }
-        cudaSetDeviceFlags(cudaDeviceMapHost);
-    }
 }
 
 std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
@@ -45,7 +35,6 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
         default:
             if (m_memType == ZERO_COPY) {
                 M_C(cudaHostAlloc(&mask, sizeMask, cudaHostAllocMapped));
-                cudaHostGetDevicePointer(&d_mask, mask, 0);
             } else if (m_memType == PINNED) {
                 M_C(cudaMallocHost((void **) &mask, sizeMask));
             } else { // including memType NORMAL
@@ -61,21 +50,21 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     }
 
     if (m_memType == ZERO_COPY) {
-
+        cudaHostGetDevicePointer(&d_mask, mask, 0);
     } else {
-
+        M_C(cudaMalloc((void**) &d_mask,          sizeMask));
     }
 
     M_C(cudaMalloc((void**) &d_edges,         sizeNodes));
     M_C(cudaMalloc((void**) &d_destinations,  sizeEdges));
     M_C(cudaMalloc((void**) &d_weights,       sizeWeights));
-    M_C(cudaMalloc((void**) &d_mask,          sizeMask));
     M_C(cudaMalloc((void**) &d_previous_node, sizeNodes));
     M_C(cudaMalloc((void**) &d_cost,          sizeCost));
 
     M_C(cudaMemcpy(d_edges, graph->edges.data(), sizeNodes, cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_destinations, graph->destinations.data(), sizeEdges, cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_weights, graph->weights.data(), sizeWeights, cudaMemcpyHostToDevice));
+
     alg::fill_parcu(d_mask, numNodes, M_MASK_FALSE);
     alg::fill_parcu(d_previous_node, numNodes, M_INVALID_POSITION);
     alg::fill_parcu(d_cost, numNodes, std::numeric_limits<weight_t>::max());

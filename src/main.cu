@@ -14,9 +14,18 @@
 
 int main()
 {
+    // Enable Zero Copy
+    // Source: https://arrayfire.com/zero-copy-on-tegra-k1/
+    cudaDeviceProp prop{};
+    cudaGetDeviceProperties(&prop, 0);
+    if (!prop.canMapHostMemory) {
+        M_RUNTIME_ERROR("Zero copy memory not supported by the GPU");
+    }
+    cudaSetDeviceFlags(cudaDeviceMapHost);
+
     srand(time(nullptr));
 
-    for (int i = 1; i <= 7; i++)
+    for (int i = 1; i <= 5; i++)
     {
         int nodes = pow(10, i);
 
@@ -52,18 +61,25 @@ int main()
 
         SSSP_Thrust thrust(graph);
         time_measurement::startMeasurement("SSSP Thrust");
-        std::shared_ptr<Paths> paths3 = standard.compute(random_source);
+        std::shared_ptr<Paths> paths3 = thrust.compute(random_source);
         time_measurement::endMeasurement("SSSP Thrust");
 
-        SSSP_Pinned_Memory pinned(graph);
+        //SSSP_Pinned_Memory pinned(graph);
+        SSSP_Standard pinned(graph, SSSP_Standard::PINNED, SSSP_Standard::CPU);
         time_measurement::startMeasurement("SSSP Pinned");
         std::shared_ptr<Paths> paths4 = pinned.compute(random_source);
         time_measurement::endMeasurement("SSSP Pinned");
+
+        SSSP_Standard zeroCopy(graph, SSSP_Standard::ZERO_COPY, SSSP_Standard::CPU);
+        time_measurement::startMeasurement("SSSP Zero Copy");
+        std::shared_ptr<Paths> paths5 = zeroCopy.compute(random_source);
+        time_measurement::endMeasurement("SSSP Zero Copy");
 
         std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
         std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
         std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
         std::cout << "path 1 and 4 same? " << paths1->isEqualTo(paths4.get()) << std::endl;
+        std::cout << "path 1 and 5 same? " << paths1->isEqualTo(paths5.get()) << std::endl;
 
         std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
     }
