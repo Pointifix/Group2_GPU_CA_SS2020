@@ -37,9 +37,9 @@ namespace graphgen {
         //   directedness
         const int num_edges = (int) (density * (float) num_nodes * (float) (num_nodes - 1) * (directed ? 1 : 0.5));
 
-        std::vector<int> edges(num_nodes);
-        std::vector<int> directions(num_edges);
-        std::vector<int> weights(num_edges);
+        std::vector<pos_t> edges(num_nodes);
+        std::vector<pos_t> directions(num_edges);
+        std::vector<weight_t> weights(num_edges);
 
         // init random number generator, create building vectors
         srand(seed);
@@ -129,9 +129,9 @@ namespace graphgen {
         //   directedness
         const int num_edges = (int) (density * (float) num_nodes * (float) (num_nodes - 1) * (directed ? 1 : 0.5));
 
-        std::vector<int> edges(num_nodes);
-        std::vector<int> destinations(num_edges, -1);
-        std::vector<int> weights(num_edges);
+        std::vector<pos_t> edges(num_nodes);
+        std::vector<pos_t> destinations(num_edges, -1);
+        std::vector<weight_t> weights(num_edges);
 
         int edges_remaining = num_edges;
         std::vector<int> edges_count(num_nodes, 0);

@@ -6,7 +6,7 @@
   * @param destinations Destinations
   * @param weights Weights
   */
-Graph::Graph(std::vector<int> &edges, std::vector<int> &destinations, std::vector<int> &weights) :
+Graph::Graph(std::vector<pos_t> &edges, std::vector<pos_t> &destinations, std::vector<weight_t> &weights) :
     edges(std::move(edges)), destinations(std::move(destinations)), weights(std::move(weights))
 {
 }
@@ -29,24 +29,24 @@ std::string Graph::toString() {
     return builder + "\n";
 }
 
-std::vector<std::vector<int>> Graph::printAdjacencyMatrix()
+std::vector<std::vector<weight_t>> Graph::printAdjacencyMatrix()
 {
-    std::vector<std::vector<int>> adjacencyMatrix(edges.size(), std::vector<int>(edges.size(), 0));
+    std::vector<std::vector<weight_t>> adjacencyMatrix(edges.size(), std::vector<weight_t>(edges.size(), 0));
 
-    for(int i = 0; i < edges.size(); i++)
+    for(pos_t i = 0; i < edges.size(); i++)
     {
-        int first = edges[i];
-        int last = (i + 1 < edges.size()) ? edges[i + 1] : destinations.size();
+        pos_t first = edges[i];
+        pos_t last = (i + 1 < edges.size()) ? edges[i + 1] : destinations.size();
 
-        for(int j = first; j < last; j++)
+        for(pos_t j = first; j < last; j++)
         {
             adjacencyMatrix[i][destinations[j]] = weights[j];
         }
     }
 
-    for(int i = 0; i < edges.size(); i++)
+    for(pos_t i = 0; i < edges.size(); i++)
     {
-        for(int j = 0; j < edges.size(); j++)
+        for(pos_t j = 0; j < edges.size(); j++)
         {
             std::cout << adjacencyMatrix[i][j] << ", ";
         }
@@ -56,7 +56,7 @@ std::vector<std::vector<int>> Graph::printAdjacencyMatrix()
     return adjacencyMatrix;
 }
 
-Paths::Paths(std::vector<int> &previous_nodes, std::vector<int> &costs, int source_node, std::shared_ptr<Graph> graph) :
+Paths::Paths(std::vector<pos_t> &previous_nodes, std::vector<weight_t> &costs, pos_t source_node, std::shared_ptr<Graph> graph) :
     previous_nodes(std::move(previous_nodes)), costs(costs), source_node(source_node), graph(graph)
 {
 }
@@ -78,12 +78,12 @@ std::string Paths::toString() {
     return builder + "\n";
 }
 
-std::vector<int> Paths::getPath(int destination)
+std::vector<pos_t> Paths::getPath(pos_t destination)
 {
-    std::vector<int> path;
+    std::vector<pos_t> path;
     path.push_back(destination);
 
-    int current_node = destination;
+    pos_t current_node = destination;
 
     while(previous_nodes[current_node] != -1 && current_node != source_node)
     {
@@ -101,14 +101,14 @@ bool Paths::isEqualTo(const Paths* path) {
 
     std::vector<int> difference;
 
-    for (int i = 0; i < this->previous_nodes.size(); i++)
+    for (size_t i = 0; i < this->previous_nodes.size(); i++)
     {
         if (this->previous_nodes.at(i) != path->previous_nodes.at(i)) difference.push_back(i);
     }
 
     std::cout << "Difference: " << difference.size() << std::endl;
 
-    for (int i = 0; i < difference.size(); i++)
+    for (pos_t i = 0; i < difference.size(); i++)
     {
         if (this->costs.at(difference.at(i)) != path->costs.at(difference.at(i))) return false;
     }

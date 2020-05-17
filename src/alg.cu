@@ -1,8 +1,8 @@
 #include "alg.cuh"
 
 namespace alg {
-    __global__ void SSSP_Kernel(const data_t* edges, const data_t* destinations, const data_t* weights,
-                                data_t* previous_node, bool* mask, data_t* cost,
+    __global__ void SSSP_Kernel(const pos_t* edges, const pos_t* destinations, const weight_t * weights,
+                                pos_t* previous_node, mask_t* mask, weight_t * cost,
                                 size_t nodes_amount, size_t edges_amount)
     {
         uint tid = threadIdx.x + blockDim.x * blockIdx.x;
@@ -11,25 +11,25 @@ namespace alg {
 
         if (mask[tid])
         {
-            data_t first = edges[tid];
-            data_t last = (tid + 1 < nodes_amount) ? edges[tid + 1] : edges_amount;
+            pos_t first = edges[tid];
+            pos_t last = (tid + 1 < nodes_amount) ? edges[tid + 1] : edges_amount;
 
-            mask[tid] = false;
+            mask[tid] = M_MASK_FALSE;
 
-            for (data_t i = first; i < last; i++)
+            for (pos_t i = first; i < last; i++)
             {
-                data_t nid = destinations[i];
+                pos_t nid = destinations[i];
 
                 if(cost[nid] > cost[tid] + weights[i])
                 {
-                    data_t new_cost = cost[tid] + weights[i];
+                    weight_t new_cost = cost[tid] + weights[i];
 
                     atomicMin(&cost[nid], new_cost);
 
                     if (cost[nid] == new_cost)
                     {
                         previous_node[nid] = tid;
-                        mask[nid] = true;
+                        mask[nid] = M_MASK_TRUE;
                     }
 
                 }
@@ -54,13 +54,13 @@ namespace alg {
         M_CFUN((_fill_parcu<<< numBlocks, threadsPerBlock >>>(d_a, Na, value)));
     }
 
-    template<class T> void set_parcu(T *d_a, size_t position, T value) {
+    template<class T> void set_parcu(T *d_a, pos_t position, T value) {
         M_CFUN((_fill_parcu<T><<< 1, 1 >>>(&d_a[position], 1, value)));
     }
 
-    template void fill_parcu(mask_t *d_a, size_t Na, mask_t value);
-    template void fill_parcu(data_t *d_a, size_t Na, data_t value);
+    template void fill_parcu(bool *d_a, size_t Na, bool value);
+    template void fill_parcu(int *d_a, size_t Na, int value);
 
-    template void set_parcu(mask_t *d_a, size_t position, mask_t value);
-    template void set_parcu(data_t *d_a, size_t position, data_t value);
+    template void set_parcu(bool *d_a, pos_t position, bool value);
+    template void set_parcu(int *d_a, pos_t position, int value);
 }
