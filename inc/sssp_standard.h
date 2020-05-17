@@ -13,27 +13,22 @@
 class SSSP_Standard : public SSSP {
 public:
 
-    enum MemoryType {
+    enum SSSPMode {
         NORMAL,
         PINNED,
-        ZERO_COPY
-    };
-
-    enum SearchType {
-        CPU,
-        GPU
+        ZERO_COPY,
+        GPU_SEARCH
     };
 
     /**
      * SSSP instance for standard CUDA computation.
      * @param graph graph that is used for computations.
      */
-    explicit SSSP_Standard(std::shared_ptr<Graph> graph, MemoryType memType, SearchType searchType);
+    explicit SSSP_Standard(std::shared_ptr<Graph> graph, SSSPMode mode);
     std::shared_ptr<Paths> compute(int source_node) override;
 
 private:
-    MemoryType m_memType;
-    SearchType m_searchType;
+    SSSPMode m_mode;
 
 };
 

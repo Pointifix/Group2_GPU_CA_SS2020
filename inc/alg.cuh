@@ -18,10 +18,13 @@ namespace alg {
      * @param value Value that 'a' will be filled with
      */
     template<class T>
-    void fill_parcu(T *d_a, size_t Na, T value);
+    void fill_parcu(T *d_a, const size_t &Na, const T &value);
 
     template<class T>
-    void set_parcu(T *d_a, pos_t position, T value);
+    void set_parcu(T *d_a, const pos_t &position, const T &value);
+
+    template <class T>
+    void contains_parcu(const T *d_a, const size_t &Na, const T &value, bool &out);
 
 }
 
