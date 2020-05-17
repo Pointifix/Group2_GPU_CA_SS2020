@@ -9,16 +9,19 @@ using uint = unsigned int;
 
 namespace alg {
 
-    __global__ void SSSP_Kernel(const m_t* edges, const m_t* destinations, const m_t* weights,
-                                m_t* previous_node, int* mask, m_t* cost,
+    __global__ void SSSP_Kernel(const data_t* edges, const data_t* destinations, const data_t* weights,
+                                data_t* previous_node, bool* mask, data_t* cost,
                                 size_t nodes_amount, size_t edges_amount);
 
     /**
      * @param a Vector that will be filled
-     * @param firstValue Value that will be in a[0]
-     * @param increment a[i] will have the value: firstValue + (i * increment)
+     * @param value Value that 'a' will be filled with
      */
-    void fill_parcu(m_t *d_a, size_t Na, m_t firstValue, m_t increment=0);
+    template<class T>
+    void fill_parcu(T *d_a, size_t Na, T value);
+
+    template<class T>
+    void set_parcu(T *d_a, size_t position, T value);
 
 }
 

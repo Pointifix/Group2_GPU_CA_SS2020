@@ -3,7 +3,9 @@
 
 #define M_BLOCKSIZE 256
 using uint = unsigned int;
-using m_t = int;
+using mask_t = bool;
+using data_t = int;
+static constexpr data_t M_INVALID = -1;
 
 #ifdef DEBUG
 
@@ -32,6 +34,9 @@ using m_t = int;
 // DEBUG
 #define M_D(a) a
 
+// DEBUG + CHECK
+#define M_DC(a) M_C(a)
+
 // ASSERT
 #define M_A(a) if(!(a)) { \
     fprintf(stderr, "DEBUG ASSERTION ERROR \"%s\" (%s, line %i)\n", #a, __FILE__, __LINE__); \
@@ -42,6 +47,7 @@ using m_t = int;
 #define M_C(a) a
 #define M_CFUN(a) a
 #define M_D(a)
+#define M_DC(a)
 #define M_A(a)
 #endif
 

@@ -1,44 +1,66 @@
 #include "sssp_standard.h"
 
-SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
+SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph, MemoryType memType) :
+    SSSP(std::move(graph)), m_memType(memType) {
 }
-
-
 
 std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
 {
-    std::vector<m_t> previous_nodes(graph->edges.size(), -1);
-    std::vector<int> mask(graph->edges.size(), 0);
-    std::vector<m_t> cost(graph->edges.size(), std::numeric_limits<m_t>::max());
+    size_t numNodes = graph->edges.size();
+    size_t numEdges = graph->destinations.size();
 
-    mask.at(source_node) = true;
-    cost.at(source_node) = 0;
+    size_t sizeNodes = numNodes * sizeof(data_t);
+    size_t sizeEdges = numEdges * sizeof(data_t);
 
-    m_t *d_edges = nullptr;
-    m_t *d_destinations = nullptr;
-    m_t *d_weights = nullptr;
-    m_t *d_previous_node = nullptr;
-    int *d_mask = nullptr;
-    m_t *d_cost = nullptr;
+    data_t *d_edges = nullptr;
+    data_t *d_destinations = nullptr;
+    data_t *d_weights = nullptr;
 
-    M_C(cudaMalloc((void**) &d_edges,          graph->edges.size() * sizeof(m_t)));
-    M_C(cudaMalloc((void**) &d_destinations,   graph->destinations.size() * sizeof(m_t)));
-    M_C(cudaMalloc((void**) &d_weights,        graph->weights.size() * sizeof(m_t)));
+    mask_t *mask = nullptr;
+    mask_t *d_mask = nullptr;
+    size_t sizeMask = numNodes * sizeof(mask_t);
 
-    M_C(cudaMalloc((void**) &d_previous_node, previous_nodes.size() * sizeof(m_t)));
-    M_C(cudaMalloc((void**) &d_mask, mask.size() * sizeof(int)));
-    M_C(cudaMalloc((void**) &d_cost, cost.size() * sizeof(m_t)));
+    data_t *d_previous_node = nullptr;
+    data_t *d_cost = nullptr;
 
-    M_C(cudaMemcpy(d_edges,        &graph->edges[0],        graph->edges.size() * sizeof(m_t),          cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_destinations, &graph->destinations[0], graph->destinations.size() * sizeof(m_t),   cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_weights,      &graph->weights[0],      graph->weights.size() * sizeof(m_t),        cudaMemcpyHostToDevice));
+    switch (m_memType) {
+        case ZERO_COPY:
+            // TODO
+            M_A(false);
+            std::terminate();
+            break;
+        case PINNED:
+            M_C(cudaMallocHost((void**) &mask, sizeMask));
+            break;
+        case NORMAL:
+        default:
+            mask = (bool*) malloc(sizeMask);
+            break;
+    }
 
-    M_C(cudaMemcpy(d_previous_node, previous_nodes.data(),  previous_nodes.size() * sizeof(m_t),cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_mask,          mask.data(),            mask.size() * sizeof(int),         cudaMemcpyHostToDevice));
-    M_C(cudaMemcpy(d_cost,          cost.data(),            cost.size() * sizeof(m_t),          cudaMemcpyHostToDevice));
+    M_C(cudaMalloc((void**) &d_edges,         sizeNodes));
+    M_C(cudaMalloc((void**) &d_destinations,  sizeEdges));
+    M_C(cudaMalloc((void**) &d_weights,       sizeEdges));
+    M_C(cudaMalloc((void**) &d_mask,          sizeMask));
+    M_C(cudaMalloc((void**) &d_previous_node, sizeNodes));
+    M_C(cudaMalloc((void**) &d_cost,          sizeNodes));
+
+    M_C(cudaMemcpy(d_edges,        graph->edges.data(),        sizeNodes, cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_destinations, graph->destinations.data(), sizeEdges, cudaMemcpyHostToDevice));
+    M_C(cudaMemcpy(d_weights,      graph->weights.data(),      sizeEdges, cudaMemcpyHostToDevice));
+    alg::fill_parcu(d_mask, numNodes, false);
+    alg::fill_parcu(d_previous_node, numNodes, M_INVALID);
+    alg::fill_parcu(d_cost, numNodes, std::numeric_limits<data_t>::max());
+
+    alg::set_parcu(d_mask, source_node, true);
+    alg::set_parcu(d_cost, source_node, 0);
+
+    M_DC(cudaMemcpy(mask, d_mask, sizeMask, cudaMemcpyDeviceToHost));
 
     // while we still find false in the mask (Ma not empty)
-    while (std::find(mask.begin(), mask.end(), true) != mask.end())
+    const mask_t *maskFirst = &mask[0];
+    const mask_t *maskLast = &mask[numNodes];
+    while (std::find(maskFirst, maskLast, true) != maskLast)
     {
         int numBlocks = ceil((double)graph->edges.size() / M_BLOCKSIZE);
 
@@ -46,11 +68,13 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
                 d_previous_node, d_mask, d_cost, graph->edges.size(), graph->destinations.size())));
 
         //copy back mask
-        M_C(cudaMemcpy(&mask[0], d_mask, mask.size() * sizeof(int), cudaMemcpyDeviceToHost));
+        M_C(cudaMemcpy(mask, d_mask, sizeMask, cudaMemcpyDeviceToHost));
     }
 
-    M_C(cudaMemcpy(&previous_nodes[0], d_previous_node, previous_nodes.size() * sizeof(int), cudaMemcpyDeviceToHost));
-    M_C(cudaMemcpy(&cost[0], d_cost, cost.size() * sizeof(int), cudaMemcpyDeviceToHost));
+    std::vector<data_t> previous_nodes(numNodes);
+    std::vector<data_t> cost(numNodes);
+    M_C(cudaMemcpy(previous_nodes.data(), d_previous_node, sizeNodes, cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(cost.data(), d_cost, sizeNodes, cudaMemcpyDeviceToHost));
 
     M_C(cudaFree(d_edges));
     M_C(cudaFree(d_destinations));
@@ -59,7 +83,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     M_C(cudaFree(d_mask));
     M_C(cudaFree(d_cost));
 
-    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(previous_nodes, cost, source_node, graph));
+    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths( previous_nodes, cost, source_node, graph));
 
     return paths;
 }
