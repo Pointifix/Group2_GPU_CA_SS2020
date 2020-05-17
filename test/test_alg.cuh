@@ -1,7 +1,7 @@
 #ifndef GROUP2_GPU_CA_SS2020_TEST_CONTOCCUR_H
 #define GROUP2_GPU_CA_SS2020_TEST_CONTOCCUR_H
 
-#include "catch.hpp"
+/*#include "catch.hpp"
 
 #include "alg.cuh"
 
@@ -131,6 +131,6 @@ TEST_CASE("Test alg") {
             CHECK(out_size1055 == exp_size1055);
         }
     }
-}
+}*/
 
 #endif //GROUP2_GPU_CA_SS2020_TEST_CONTOCCUR_H

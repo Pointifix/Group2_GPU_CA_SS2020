@@ -3,19 +3,13 @@
 
 #define M_BLOCKSIZE 256
 using uint = unsigned int;
+using m_t = int;
 
 #ifdef DEBUG
 
 #include <cstdio>
 #include <stdexcept>
 #include <string>
-
-namespace debug {
-    class OurAssertException : public std::runtime_error {
-    public:
-        explicit OurAssertException(const std::string& message) : std::runtime_error(message) {}
-    };
-}
 
 #define _M_CHECK_PRIVATE(a,b) { \
     cudaError_t error = a; \
