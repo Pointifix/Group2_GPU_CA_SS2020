@@ -31,7 +31,6 @@ namespace alg {
                         previous_node[nid] = tid;
                         mask[nid] = M_MASK_TRUE;
                     }
-
                 }
             }
         }

@@ -29,7 +29,7 @@ namespace time_measurement
             name.append(std::string( 20 - name.length(), ' ' ) + "\t");
             for (auto const& time_point : time_point_vector.second)
             {
-                name.append(std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(time_point.second - time_point.first).count()) + " ms\t");
+                name.append(std::to_string(std::chrono::duration_cast<std::chrono::milliseconds>(time_point.second - time_point.first).count()) + " ");
             }
             std::cout << name << std::endl;
         }

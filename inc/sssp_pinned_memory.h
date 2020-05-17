@@ -2,6 +2,11 @@
 #define SSP_Pinned_Memory_H
 
 #include "sssp.h"
+#include <common.cuh>
+#include <alg.cuh>
+#include <graph.h>
+#include <algorithm>
+#include <vector>
 
 class SSSP_Pinned_Memory : public SSSP {
 public:
