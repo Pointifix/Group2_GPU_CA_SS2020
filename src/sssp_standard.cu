@@ -24,6 +24,8 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     weight_t *d_cost = nullptr;
 
     mask_t *mask = nullptr;
+    pos_t *previous_nodes = nullptr;
+    weight_t *cost = nullptr;
     std::function<bool()> maskContainsTrue;
     switch(m_searchType) {
         case GPU:
@@ -38,7 +40,7 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
             } else if (m_memType == PINNED) {
                 M_C(cudaMallocHost((void **) &mask, sizeMask));
             } else { // including memType NORMAL
-                mask = new bool[numNodes];
+                mask = new mask_t[numNodes];
             }
 
             const mask_t *maskFirst = &mask[0];
@@ -49,18 +51,35 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
             break;
     }
 
+    // Allocate host memory
     if (m_memType == ZERO_COPY) {
-        cudaHostGetDevicePointer(&d_mask, mask, 0);
+
+        // No need to allocate d_mask in Zero Copy mode!
+        M_C(cudaHostGetDevicePointer(&d_mask, mask, 0));
+
+        previous_nodes = new pos_t[numNodes];
+        cost = new weight_t[numNodes];
+    } else if (m_memType == PINNED) {
+        // Allocate d_mask in Pinned mode
+        M_C(cudaMalloc((void**) &d_mask, sizeMask));
+
+        M_C(cudaMallocHost((void **) &previous_nodes, sizeNodes));
+        M_C(cudaMallocHost((void **) &cost, sizeCost));
     } else {
-        M_C(cudaMalloc((void**) &d_mask,          sizeMask));
+        // Allocate d_mask in Normal mode
+        M_C(cudaMalloc((void**) &d_mask, sizeMask));
+
+        previous_nodes = new pos_t[numNodes];
+        cost = new weight_t[numNodes];
     }
+
+    // Allocate d_previous_node and d_cost no matter the mode
+    M_C(cudaMalloc((void**) &d_previous_node, sizeNodes));
+    M_C(cudaMalloc((void**) &d_cost,          sizeCost));
 
     M_C(cudaMalloc((void**) &d_edges,         sizeNodes));
     M_C(cudaMalloc((void**) &d_destinations,  sizeEdges));
     M_C(cudaMalloc((void**) &d_weights,       sizeWeights));
-    M_C(cudaMalloc((void**) &d_previous_node, sizeNodes));
-    M_C(cudaMalloc((void**) &d_cost,          sizeCost));
-
     M_C(cudaMemcpy(d_edges, graph->edges.data(), sizeNodes, cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_destinations, graph->destinations.data(), sizeEdges, cudaMemcpyHostToDevice));
     M_C(cudaMemcpy(d_weights, graph->weights.data(), sizeWeights, cudaMemcpyHostToDevice));
@@ -87,26 +106,26 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node)
     }
     while (maskContainsTrue());
 
-    std::vector<pos_t> previous_nodes(numNodes);
-    std::vector<weight_t> cost(numNodes);
-    M_C(cudaMemcpy(previous_nodes.data(), d_previous_node, sizeNodes, cudaMemcpyDeviceToHost));
-    M_C(cudaMemcpy(cost.data(), d_cost, sizeCost, cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(previous_nodes, d_previous_node, sizeNodes, cudaMemcpyDeviceToHost));
+    M_C(cudaMemcpy(cost, d_cost, sizeCost, cudaMemcpyDeviceToHost));
+    std::vector<pos_t> ret_previous_nodes(previous_nodes, previous_nodes + graph->edges.size());
+    std::vector<weight_t> ret_cost(cost, cost + graph->edges.size());
 
     M_C(cudaFree(d_edges));
     M_C(cudaFree(d_destinations));
     M_C(cudaFree(d_weights));
-    M_C(cudaFree(d_previous_node));
-    M_C(cudaFree(d_cost));
 
     if (m_memType != ZERO_COPY) {
         M_C(cudaFree(d_mask));
+        M_C(cudaFree(d_previous_node));
+        M_C(cudaFree(d_cost));
     }
 
     if (m_searchType == CPU && m_memType == NORMAL) {
         delete mask;
     }
 
-    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths( previous_nodes, cost, source_node, graph));
+    std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(ret_previous_nodes, ret_cost, source_node, graph));
 
     return paths;
 }
