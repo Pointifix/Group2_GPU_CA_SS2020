@@ -42,7 +42,7 @@ int main()
 
         //graphio::writePaths("output/path_sequential", paths1);
 
-        SSSP_Standard standard(graph, SSSP_Standard::NORMAL);
+        SSSP_Standard standard(graph, SSSP_Standard::NORMAL, SSSP_Standard::CPU);
         time_measurement::startMeasurement("SSSP Standard");
         std::shared_ptr<Paths> paths2 = standard.compute(random_source);
         time_measurement::endMeasurement("SSSP Standard");

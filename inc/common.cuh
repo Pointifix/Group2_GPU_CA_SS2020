@@ -43,12 +43,16 @@ static constexpr data_t M_INVALID = -1;
     std::terminate(); \
 } while(0)
 
+// DEBUG BOOL
+#define M_DEBUG true
+
 #else
 #define M_C(a) a
 #define M_CFUN(a) a
 #define M_D(a)
 #define M_DC(a)
 #define M_A(a)
+#define M_DEBUG false
 #endif
 
 #endif //GROUP2_GPU_CA_SS2020_COMMON_CUH
