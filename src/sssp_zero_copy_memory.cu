@@ -60,6 +60,7 @@ std::shared_ptr<Paths> SSSP_Zero_Copy_Memory::compute(int source_node)
         int numBlocks = ceil((double) graph->edges.size() / M_BLOCKSIZE);
         M_CFUN((alg::SSSP_Kernel<<<numBlocks, M_BLOCKSIZE>>>(d_edges, d_destinations, d_weights,
                        d_previous_node, d_mask, d_cost, graph->edges.size(), graph->destinations.size())));
+        M_C(cudaDeviceSynchronize());
     } while (std::find(maskFirst, maskLast, true) != maskLast);
 
     M_C(cudaMemcpy(previous_nodes, d_previous_node, sizeNodes, cudaMemcpyDeviceToHost));
