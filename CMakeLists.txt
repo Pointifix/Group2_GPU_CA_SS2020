@@ -16,7 +16,8 @@ set(ALL_SRCS # NO MAIN ALLOWED HERE!
         src/sssp_sequential.cu
         src/sssp_pinned_memory.cu
         src/sssp_zero_copy_memory.cu
-        src/sssp_thrust.cu)
+        src/sssp_thrust.cu
+        src/sssp_gpu_search.cu)
 
 add_executable(Group2_GPU_CA_SS2020
         ${ALL_SRCS}

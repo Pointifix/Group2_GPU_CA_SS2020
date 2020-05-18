@@ -24,7 +24,7 @@ namespace alg {
     void set_parcu(T *d_a, const pos_t &position, const T &value);
 
     template <class T>
-    void contains_parcu(const T *d_a, const size_t &Na, const T &value, bool &out);
+    void contains_parcu(const T *d_a, const size_t &Na, const T &value, bool *out);
 
 }
 

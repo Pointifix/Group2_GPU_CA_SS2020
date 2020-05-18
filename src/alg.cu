@@ -60,47 +60,43 @@ namespace alg {
     __device__ bool d_contains;
 
     template<class T> __global__ void _contains_parcu(const T *a, const size_t Na, const T value) {
-        uint tid = threadIdx.x;
-        __shared__ bool s_contains;
-
-        if (tid == 0) {
-            s_contains = false;
-        }
-        __syncthreads();
-
         uint i = threadIdx.x + blockDim.x * blockIdx.x;
         if (i >= Na) {
+            __syncthreads();
             __syncthreads();
             return;
         }
 
-        if (a[i] == value) {
-            s_contains = true;
-        }
+        uint tid = threadIdx.x;
+        __shared__ bool s_contains;
+
+        if (tid == 0) s_contains = false;
+        __syncthreads();
+
+        if (i == 0) d_contains = false;
+        if (a[i] == value) s_contains = true;
 
         __syncthreads();
-        if (tid == 0) d_contains = s_contains;
+        if (tid == 0 && s_contains) d_contains = true;
     }
 
-    template <class T> void contains_parcu(const T *d_a, const size_t &Na, const T &value, bool &out) {
+    template <class T> void contains_parcu(const T *d_a, const size_t &Na, const T &value, bool *out) {
         size_t remainingElements = Na;
         int numBlocks = 1;
-        bool contains;
         while(remainingElements > 0) {
             size_t numElements = min((size_t)numBlocks * (size_t)M_BLOCKSIZE, remainingElements);
             size_t blockStart = Na - remainingElements;
 
             M_CFUN((_contains_parcu<<< numBlocks, M_BLOCKSIZE >>>(&d_a[blockStart], numElements, value)));
-            M_C(cudaMemcpyFromSymbol(&contains, d_contains, sizeof(bool), 0, cudaMemcpyDeviceToHost));
-            if (contains) {
-                out = contains;
+            M_C(cudaMemcpyFromSymbol(out, d_contains, sizeof(bool), 0, cudaMemcpyDeviceToHost));
+            if (*out) {
                 return;
             }
 
             remainingElements -= numElements;
             numBlocks *= 2;
         }
-        out = false;
+        *out = false;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -113,5 +109,5 @@ namespace alg {
     template void set_parcu(bool *d_a, const pos_t &position, const bool &value);
     template void set_parcu(int *d_a, const pos_t &position, const int &value);
 
-    template void contains_parcu(const bool *d_a, const size_t &Na, const bool &value, bool &out);
+    template void contains_parcu(const bool *d_a, const size_t &Na, const bool &value, bool *out);
 }
