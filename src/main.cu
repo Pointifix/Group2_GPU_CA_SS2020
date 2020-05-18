@@ -14,6 +14,10 @@
 #include "sssp_zero_copy_memory.h"
 #include "sssp_gpu_search.h"
 
+#ifdef  DEBUG
+void test();
+#endif
+
 int main()
 {
     // Enable Zero Copy
@@ -25,9 +29,14 @@ int main()
     }
     cudaSetDeviceFlags(cudaDeviceMapHost);
 
+#ifdef DEBUG
+    test();
+    //return 0;
+#endif
+
     srand(time(nullptr));
 
-    for (int i = 1; i <= 5; i++)
+    for (int i = 1; i <= 7; i++)
     {
         int nodes = pow(10, i);
 
@@ -92,3 +101,9 @@ int main()
     }
     time_measurement::printMeasurements();
 }
+
+#ifdef DEBUG
+void test() {
+    M_A(true); // Use M_A to make assertions!
+}
+#endif
