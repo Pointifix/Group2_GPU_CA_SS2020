@@ -11,6 +11,7 @@
 #include "sssp_thrust.h"
 #include "time_measurement.h"
 #include "sssp_pinned_memory.h"
+#include "sssp_zero_copy_memory.h"
 
 int main()
 {
@@ -25,7 +26,7 @@ int main()
 
     srand(time(nullptr));
 
-    for (int i = 1; i <= 6; i++)
+    for (int i = 1; i <= 5; i++)
     {
         int nodes = pow(10, i);
 
@@ -52,7 +53,7 @@ int main()
 
         //graphio::writePaths("output/path_sequential", paths1);
 
-        SSSP_Standard standard(graph, SSSP_Standard::NORMAL);
+        SSSP_Standard standard(graph);
         time_measurement::startMeasurement("SSSP Standard");
         std::shared_ptr<Paths> paths2 = standard.compute(random_source);
         time_measurement::endMeasurement("SSSP Standard");
@@ -64,28 +65,27 @@ int main()
         std::shared_ptr<Paths> paths3 = thrust.compute(random_source);
         time_measurement::endMeasurement("SSSP Thrust");
 
-        //SSSP_Pinned_Memory pinned(graph);
-        SSSP_Standard pinned(graph, SSSP_Standard::PINNED);
+        SSSP_Pinned_Memory pinned(graph);
         time_measurement::startMeasurement("SSSP Pinned");
         std::shared_ptr<Paths> paths4 = pinned.compute(random_source);
         time_measurement::endMeasurement("SSSP Pinned");
 
-        SSSP_Standard zeroCopy(graph, SSSP_Standard::ZERO_COPY);
+        SSSP_Zero_Copy_Memory zeroCopy(graph);
         time_measurement::startMeasurement("SSSP Zero Copy");
         std::shared_ptr<Paths> paths5 = zeroCopy.compute(random_source);
         time_measurement::endMeasurement("SSSP Zero Copy");
 
-        SSSP_Standard gpuSearch(graph, SSSP_Standard::GPU_SEARCH);
+        /*SSSP_Standard gpuSearch(graph, SSSP_Standard::GPU_SEARCH);
         time_measurement::startMeasurement("SSSP GPU Search");
         std::shared_ptr<Paths> paths6 = gpuSearch.compute(random_source);
-        time_measurement::endMeasurement("SSSP GPU Search");
+        time_measurement::endMeasurement("SSSP GPU Search");*/
 
         std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
         std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
         std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
         std::cout << "path 1 and 4 same? " << paths1->isEqualTo(paths4.get()) << std::endl;
         std::cout << "path 1 and 5 same? " << paths1->isEqualTo(paths5.get()) << std::endl;
-        std::cout << "path 1 and 6 same? " << paths1->isEqualTo(paths6.get()) << std::endl;
+        //std::cout << "path 1 and 6 same? " << paths1->isEqualTo(paths6.get()) << std::endl;
 
         std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
     }

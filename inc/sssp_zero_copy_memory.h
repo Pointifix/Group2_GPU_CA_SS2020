@@ -3,6 +3,8 @@
 
 #include "sssp.h"
 
+#include "alg.cuh"
+
 class SSSP_Zero_Copy_Memory : public SSSP {
 public:
     /**

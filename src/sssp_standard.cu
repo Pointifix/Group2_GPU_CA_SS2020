@@ -1,7 +1,6 @@
 #include "sssp_standard.h"
 
-SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph, SSSPMode mode) :
-    SSSP(std::move(graph)), m_mode(mode) {
+SSSP_Standard::SSSP_Standard(std::shared_ptr<Graph> graph) : SSSP(std::move(graph)) {
 }
 
 std::shared_ptr<Paths> SSSP_Standard::compute(int source_node) {
@@ -23,51 +22,15 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node) {
     pos_t *d_previous_node = nullptr;
     weight_t *d_cost = nullptr;
 
-    mask_t *mask = nullptr;
-    pos_t *previous_nodes = nullptr;
-    weight_t *cost = nullptr;
-    std::function<bool()> maskContainsTrue;
-
     // Allocate host memory
-    if (m_mode == ZERO_COPY) {
-        M_C(cudaHostAlloc(&mask, sizeMask, cudaHostAllocMapped));
-        M_C(cudaHostGetDevicePointer(&d_mask, mask, 0)); // No need to allocate d_mask in Zero Copy mode!
-        previous_nodes = new pos_t[numNodes];
-        cost = new weight_t[numNodes];
-    } else if (m_mode == PINNED) {
-        M_C(cudaMallocHost((void **) &mask, sizeMask));
-        M_C(cudaMalloc((void **) &d_mask, sizeMask)); // Allocate d_mask in Pinned mode
-        M_C(cudaMallocHost((void **) &previous_nodes, sizeNodes));
-        M_C(cudaMallocHost((void **) &cost, sizeCost));
-    } else if (m_mode == NORMAL) {
-        mask = new mask_t[numNodes];
-        // Allocate d_mask in Normal and GPU Search modes
-        M_C(cudaMalloc((void **) &d_mask, sizeMask));
-        previous_nodes = new pos_t[numNodes];
-        cost = new weight_t[numNodes];
-    }
-
-    // Define maskContainsTrue function
-    if (m_mode == GPU_SEARCH) {
-        M_C(cudaMalloc((void **) &d_mask, sizeMask)); // Allocate d_mask in Pinned mode
-        previous_nodes = new pos_t[numNodes];
-        cost = new weight_t[numNodes];
-        maskContainsTrue = [d_mask, numNodes]() {
-            bool out = false;
-            alg::contains_parcu(d_mask, numNodes, M_MASK_TRUE, out);
-            return out;
-        };
-    } else {
-        const mask_t *maskFirst = &mask[0];
-        const mask_t *maskLast = &mask[numNodes];
-        maskContainsTrue = [maskFirst, maskLast]() {
-            return std::find(maskFirst, maskLast, true) != maskLast;
-        };
-    }
+    auto *mask = new mask_t[numNodes];
+    auto *previous_nodes = new pos_t[numNodes];
+    auto *cost = new weight_t[numNodes];
 
     // Allocate d_previous_node and d_cost no matter the mode
     M_C(cudaMalloc((void **) &d_previous_node, sizeNodes));
     M_C(cudaMalloc((void **) &d_cost, sizeCost));
+    M_C(cudaMalloc((void **) &d_mask, sizeMask));
 
     M_C(cudaMalloc((void **) &d_edges, sizeNodes));
     M_C(cudaMalloc((void **) &d_destinations, sizeEdges));
@@ -84,17 +47,17 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node) {
     alg::set_parcu(d_cost, source_node, 0);
 
     // while we still find true in the mask (Ma not empty)
+    const mask_t *maskFirst = &mask[0];
+    const mask_t *maskLast = &mask[numNodes];
     do {
         int numBlocks = ceil((double) graph->edges.size() / M_BLOCKSIZE);
 
         M_CFUN((alg::SSSP_Kernel<<<numBlocks, M_BLOCKSIZE>>>(d_edges, d_destinations, d_weights,
                        d_previous_node, d_mask, d_cost, graph->edges.size(), graph->destinations.size())));
 
-        if (m_mode == NORMAL || m_mode == PINNED) {
-            //copy back mask
-            M_C(cudaMemcpy(mask, d_mask, sizeMask, cudaMemcpyDeviceToHost));
-        }
-    } while (maskContainsTrue());
+        //copy back mask
+        M_C(cudaMemcpy(mask, d_mask, sizeMask, cudaMemcpyDeviceToHost));
+    } while (std::find(maskFirst, maskLast, true) != maskLast);
 
     M_C(cudaMemcpy(previous_nodes, d_previous_node, sizeNodes, cudaMemcpyDeviceToHost));
     M_C(cudaMemcpy(cost, d_cost, sizeCost, cudaMemcpyDeviceToHost));
@@ -106,32 +69,11 @@ std::shared_ptr<Paths> SSSP_Standard::compute(int source_node) {
     M_C(cudaFree(d_weights));
     M_C(cudaFree(d_previous_node));
     M_C(cudaFree(d_cost));
+    M_C(cudaFree(d_mask));
 
-    switch (m_mode) {
-        case ZERO_COPY:
-            M_C(cudaFreeHost(mask));
-            delete previous_nodes;
-            delete cost;
-            break;
-        case PINNED:
-            M_C(cudaFreeHost(mask));
-            M_C(cudaFreeHost(previous_nodes));
-            M_C(cudaFreeHost(cost));
-            M_C(cudaFree(d_mask));
-            break;
-        case GPU_SEARCH:
-            delete previous_nodes;
-            delete cost;
-            M_C(cudaFree(d_mask));
-            break;
-        case NORMAL:
-        default:
-            delete mask;
-            delete previous_nodes;
-            delete cost;
-            M_C(cudaFree(d_mask));
-            break;
-    }
+    delete[] mask;
+    delete[] previous_nodes;
+    delete[] cost;
 
     std::shared_ptr<Paths> paths = std::make_shared<Paths>(Paths(ret_previous_nodes, ret_cost, source_node, graph));
 
