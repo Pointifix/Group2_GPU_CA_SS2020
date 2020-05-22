@@ -8,6 +8,9 @@
 #include <numeric>
 #include <list>
 
+#include "alg.cuh"
+#include "common.cuh"
+
 #include "graph.h"
 
 namespace graphgen {
@@ -116,7 +119,7 @@ namespace graphgen {
      * @return connected Graph
      */
     std::shared_ptr<Graph> generateGraph(int num_nodes, float density,
-                                                   bool directed = true, int max_weight = 10,
+                                                   bool directed = true, int max_weight = 1000,
                                                    unsigned int seed = time(nullptr)) {
         if (num_nodes < 2 || density < 0 || density > 1) {
             return nullptr;
@@ -139,12 +142,10 @@ namespace graphgen {
         srand(seed);
 
         // distribute how many edges each node has randomly
-        while(edges_remaining > 0)
-        {
+        while(edges_remaining > 0) {
             int random_node = rand() % num_nodes;
 
-            if (edges_count[random_node] < num_nodes - 1)
-            {
+            if (edges_count[random_node] < num_nodes - 1) {
                 edges_count[random_node]++;
                 edges_remaining--;
             }
@@ -158,9 +159,31 @@ namespace graphgen {
             current_destination += edges_count.at(i);
         }
 
-        // assign random destinations
-        int random_node;
+        // fill destinations randomly on gpu
+        curandState *d_states;
+        pos_t* d_edges;
+        pos_t* d_destinations;
+        weight_t* d_weights;
 
+        int numBlocks = ceil((double) num_nodes / M_BLOCKSIZE);
+
+        M_C(cudaMalloc((void **) &d_states, numBlocks * sizeof(curandState)));
+        M_C(cudaMalloc((void **) &d_edges, num_nodes * sizeof(pos_t)));
+        M_C(cudaMalloc((void **) &d_destinations, num_edges * sizeof(pos_t)));
+        M_C(cudaMalloc((void **) &d_weights, num_edges * sizeof(weight_t)));
+
+        M_C(cudaMemcpy(d_edges, edges.data(), num_nodes * sizeof(pos_t), cudaMemcpyHostToDevice));
+
+        int numBlocksBlocks = ceil((double) numBlocks / M_BLOCKSIZE);
+
+        M_CFUN((alg::setup_kernel<<<numBlocksBlocks, M_BLOCKSIZE>>>(d_states, rand(), numBlocks)));
+
+        M_CFUN((alg::random_graph_Kernel<<<numBlocks, M_BLOCKSIZE>>>(d_states, d_edges, d_destinations, d_weights, num_edges, num_nodes, max_weight)));
+
+        M_C(cudaMemcpy(destinations.data(), d_destinations, num_edges * sizeof(pos_t), cudaMemcpyDeviceToHost));
+        M_C(cudaMemcpy(weights.data(), d_weights, num_edges * sizeof(weight_t), cudaMemcpyDeviceToHost));
+
+        /*
         for (int i = 0; i < num_nodes; i++)
         {
             int first = edges[i];
@@ -168,16 +191,16 @@ namespace graphgen {
 
             for (int j = first; j < last; j++)
             {
-                do random_node = rand() % num_nodes; while (random_node == i || std::find(destinations.begin() + first, destinations.begin() + last, random_node) != destinations.begin() + last);
-
-                destinations.at(j) = random_node;
+                std::cout << destinations[j] << ", ";
             }
-
-            std::sort(destinations.begin() + first, destinations.begin() + last);
+            std::cout << std::endl;
         }
+        */
 
-        // assign random weights
-        for (int i = 0; i < num_edges; i++) weights.at(i) = rand() % max_weight;
+        cudaFree(d_states);
+        cudaFree(d_destinations);
+        cudaFree(d_edges);
+        cudaFree(d_weights);
 
         return std::make_shared<Graph>(Graph(edges, destinations, weights));
     }

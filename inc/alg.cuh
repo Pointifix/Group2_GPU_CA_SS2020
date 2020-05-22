@@ -4,6 +4,9 @@
 #include "common.cuh"
 
 #include <vector>
+#include <curand.h>
+#include <curand_kernel.h>
+#include <thrust/sort.h>
 
 using uint = unsigned int;
 
@@ -12,6 +15,9 @@ namespace alg {
     __global__ void SSSP_Kernel(const pos_t* edges, const pos_t* destinations, const weight_t * weights,
                                 pos_t *previous_node, mask_t *mask, weight_t *cost,
                                 size_t nodes_amount, size_t edges_amount);
+
+    __global__ void setup_kernel(curandState *state, int seed, int num_blocks);
+    __global__ void random_graph_Kernel(curandState *state, const pos_t *edges, pos_t *destinations, weight_t *weights, int num_edges, int num_nodes, int max_weight);
 
     /**
      * @param a Vector that will be filled

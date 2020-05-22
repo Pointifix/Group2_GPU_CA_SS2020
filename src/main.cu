@@ -36,13 +36,15 @@ int main()
 
     srand(time(nullptr));
 
-    for (int i = 1; i <= 7; i++)
+    for (int i = 1; i <= 8; i++)
     {
         int nodes = pow(10, i);
 
         time_measurement::startMeasurement("Graph Generation");
         std::shared_ptr<Graph> graph = graphgen::generateGraph(nodes, graphgen::calculateDensity(nodes * 5, nodes, true));
         time_measurement::endMeasurement("Graph Generation");
+
+        //std::cout << graph->toString() << std::endl;
 
         /*
         time_measurement::startMeasurement("Graph Output");
@@ -53,6 +55,7 @@ int main()
         std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
         time_measurement::endMeasurement("Graph Input");
          */
+
 
         int random_source = rand() % nodes;
 

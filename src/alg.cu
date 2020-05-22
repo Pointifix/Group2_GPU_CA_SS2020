@@ -36,6 +36,75 @@ namespace alg {
         }
     }
 
+    __device__ void selection_sort( int *data, int left, int right )
+    {
+        for( int i = left ; i <= right ; ++i ){
+            int min_val = data[i];
+            int min_idx = i;
+
+            // Find the smallest value in the range [left, right].
+            for( int j = i+1 ; j <= right ; ++j ){
+                int val_j = data[j];
+                if( val_j < min_val ){
+                    min_idx = j;
+                    min_val = val_j;
+                }
+            }
+
+            // Swap the values.
+            if( i != min_idx ){
+                data[min_idx] = data[i];
+                data[i] = min_val;
+            }
+        }
+    }
+
+    __global__ void setup_kernel(curandState *state, int seed, int num_blocks)
+    {
+        uint id = threadIdx.x + blockIdx.x * blockDim.x;
+
+        if(id >= num_blocks) return;
+
+        curand_init(seed, id, 0, &state[id]);
+    }
+
+    __global__ void random_graph_Kernel(curandState *state, const pos_t *edges, pos_t *destinations, weight_t *weights, int num_edges, int num_nodes, int max_weight)
+    {
+        uint id = threadIdx.x + blockIdx.x * blockDim.x;
+
+        if(id >= num_nodes) return;
+
+        int first = edges[id];
+        int last = (id + 1 < num_nodes) ? edges[id + 1] : num_edges;
+
+        pos_t random_node;
+        curandState local_state = state[blockIdx.x];
+        bool already_connected;
+
+        for (int i = first; i < last; i++)
+        {
+            do {
+                already_connected = false;
+                random_node = curand_uniform(&local_state) * num_nodes;
+
+                for (int j = first; j < i; j++)
+                {
+                    if (destinations[j] == random_node)
+                    {
+                        already_connected = true;
+                        break;
+                    }
+                }
+            } while (random_node == id || already_connected);
+
+            destinations[i] = random_node;
+
+            weights[i] = curand_uniform(&local_state) * max_weight;
+        }
+
+        selection_sort(destinations, first, last - 1);
+    }
+
     // -----------------------------------------------------------------------------------------------------------------
     // PARALLEL IMPLEMENTATIONS (CUDA)
     // -----------------------------------------------------------------------------------------------------------------
