@@ -46,7 +46,18 @@ public:
 
     std::string toString();
 
-    bool isEqualTo(const Paths* path);
+    /**
+     * Compares two paths, returns d
+     *
+     * d = 0: Paths have equal costs and previous nodes
+     * d > 0: Paths have equal costs but found d different paths
+     * d = -1: Paths found different paths with different costs
+     * d = -2: previous nodes array lengths differ
+     *
+     * @param path
+     * @return
+     */
+    int isEqualTo(const Paths* path);
 
     std::vector<pos_t> getPath(pos_t destination);
 };

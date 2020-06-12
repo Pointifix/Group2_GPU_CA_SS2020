@@ -16,7 +16,7 @@ namespace alg {
                                 pos_t *previous_node, mask_t *mask, weight_t *cost,
                                 size_t nodes_amount, size_t edges_amount);
 
-    __global__ void setup_kernel(curandState *state, int seed, int num_blocks);
+    __global__ void setup_kernel(curandState *state, int seed, int num_nodes);
     __global__ void random_graph_Kernel(curandState *state, const pos_t *edges, pos_t *destinations, weight_t *weights, int num_edges, int num_nodes, int max_weight);
 
     /**

@@ -18,6 +18,18 @@
 void test();
 #endif
 
+std::string comparePaths(std::shared_ptr<Paths> paths1, std::shared_ptr<Paths> paths2)
+{
+    int d = paths1->isEqualTo(paths2.get());
+
+    std::string message = "";
+
+    if (d >= 0) message += "Equal - Difference " + std::to_string(d);
+    else if (d == -1) message += "Costs Array differ";
+    else if (d == -2) message += "Previous Nodes length differ";
+    return message;
+}
+
 int main()
 {
     // Enable Zero Copy
@@ -36,13 +48,15 @@ int main()
 
     srand(time(nullptr));
 
-    for (int i = 1; i <= 8; i++)
+    for (int i = 10; i <= 20; i++)
     {
-        int nodes = pow(10, i);
+        int nodes = pow(2, i);
 
         time_measurement::startMeasurement("Graph Generation");
-        std::shared_ptr<Graph> graph = graphgen::generateGraph(nodes, graphgen::calculateDensity(nodes * 5, nodes, true));
+        std::shared_ptr<Graph> graph = graphgen::generateGraph(nodes, graphgen::calculateDensity(nodes * 50, nodes, true));
         time_measurement::endMeasurement("Graph Generation");
+
+        std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
 
         //std::cout << graph->toString() << std::endl;
 
@@ -55,7 +69,6 @@ int main()
         std::shared_ptr<Graph> graph2 = graphio::readGraph("output/graph");
         time_measurement::endMeasurement("Graph Input");
          */
-
 
         int random_source = rand() % nodes;
 
@@ -93,14 +106,11 @@ int main()
         std::shared_ptr<Paths> paths6 = gpuSearch.compute(random_source);
         time_measurement::endMeasurement("SSSP GPU Search");
 
-        std::cout << "path 1 and 2 same? " << paths1->isEqualTo(paths2.get()) << std::endl;
-        std::cout << "path 2 and 3 same? " << paths2->isEqualTo(paths3.get()) << std::endl;
-        std::cout << "path 1 and 3 same? " << paths1->isEqualTo(paths3.get()) << std::endl;
-        std::cout << "path 1 and 4 same? " << paths1->isEqualTo(paths4.get()) << std::endl;
-        std::cout << "path 1 and 5 same? " << paths1->isEqualTo(paths5.get()) << std::endl;
-        std::cout << "path 1 and 6 same? " << paths1->isEqualTo(paths6.get()) << std::endl;
-
-        std::cout << "\nGraph (" << graph->edges.size() << " Vertices, "<< graph->destinations.size() << " Edges)" << std::endl;
+        std::cout << "Path 1 and 2: " << comparePaths(paths1, paths2) << std::endl;
+        std::cout << "Path 1 and 3: " << comparePaths(paths1, paths3) << std::endl;
+        std::cout << "Path 1 and 4: " << comparePaths(paths1, paths4) << std::endl;
+        std::cout << "Path 1 and 5: " << comparePaths(paths1, paths5) << std::endl;
+        std::cout << "Path 1 and 6: " << comparePaths(paths1, paths6) << std::endl;
     }
     time_measurement::printMeasurements();
 }

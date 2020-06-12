@@ -59,11 +59,11 @@ namespace alg {
         }
     }
 
-    __global__ void setup_kernel(curandState *state, int seed, int num_blocks)
+    __global__ void setup_kernel(curandState *state, int seed, int num_nodes)
     {
         uint id = threadIdx.x + blockIdx.x * blockDim.x;
 
-        if(id >= num_blocks) return;
+        if(id >= num_nodes) return;
 
         curand_init(seed, id, 0, &state[id]);
     }
@@ -78,7 +78,7 @@ namespace alg {
         int last = (id + 1 < num_nodes) ? edges[id + 1] : num_edges;
 
         pos_t random_node;
-        curandState local_state = state[blockIdx.x];
+        curandState local_state = state[id];
         bool already_connected;
 
         for (int i = first; i < last; i++)
