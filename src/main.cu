@@ -30,14 +30,18 @@ std::string comparePaths(std::shared_ptr<Paths> paths1, std::shared_ptr<Paths> p
     return message;
 }
 
+
 int main()
 {
     // Enable Zero Copy
     // Source: https://arrayfire.com/zero-copy-on-tegra-k1/
+    bool do_zero_copy = true;
     cudaDeviceProp prop{};
     cudaGetDeviceProperties(&prop, 0);
     if (!prop.canMapHostMemory) {
-        M_RUNTIME_ERROR("Zero copy memory not supported by the GPU");
+        //M_RUNTIME_ERROR("Zero copy memory not supported by the GPU");
+        // Don't terminate here! Just skip zero copy...
+        do_zero_copy = false;
     }
     cudaSetDeviceFlags(cudaDeviceMapHost);
 
@@ -96,10 +100,13 @@ int main()
         std::shared_ptr<Paths> paths4 = pinned.compute(random_source);
         time_measurement::endMeasurement("SSSP Pinned");
 
-        SSSP_Zero_Copy_Memory zeroCopy(graph);
-        time_measurement::startMeasurement("SSSP Zero Copy");
-        std::shared_ptr<Paths> paths5 = zeroCopy.compute(random_source);
-        time_measurement::endMeasurement("SSSP Zero Copy");
+        std::shared_ptr<Paths> paths5;
+        if (do_zero_copy) {
+            SSSP_Zero_Copy_Memory zeroCopy(graph);
+            time_measurement::startMeasurement("SSSP Zero Copy");
+            paths5 = zeroCopy.compute(random_source);
+            time_measurement::endMeasurement("SSSP Zero Copy");
+        }
 
         SSSP_GPU_Search gpuSearch(graph);
         time_measurement::startMeasurement("SSSP GPU Search");
@@ -109,7 +116,7 @@ int main()
         std::cout << "Path 1 and 2: " << comparePaths(paths1, paths2) << std::endl;
         std::cout << "Path 1 and 3: " << comparePaths(paths1, paths3) << std::endl;
         std::cout << "Path 1 and 4: " << comparePaths(paths1, paths4) << std::endl;
-        std::cout << "Path 1 and 5: " << comparePaths(paths1, paths5) << std::endl;
+        if (do_zero_copy) std::cout << "Path 1 and 5: " << comparePaths(paths1, paths5) << std::endl;
         std::cout << "Path 1 and 6: " << comparePaths(paths1, paths6) << std::endl;
     }
     time_measurement::printMeasurements();

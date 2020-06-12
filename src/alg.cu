@@ -36,6 +36,48 @@ namespace alg {
         }
     }
 
+    __device__ bool d_contains_true;
+
+    __global__ void SSSP_Kernel2(const pos_t* edges, const pos_t* destinations, const weight_t * weights,
+                                pos_t* previous_node, mask_t* mask, weight_t * cost,
+                                size_t nodes_amount, size_t edges_amount)
+    {
+        uint gid = threadIdx.x + blockDim.x * blockIdx.x;
+        if (gid >= nodes_amount) {
+            __syncthreads();
+            __syncthreads();
+            return;
+        }
+
+        bool t_contains_true = false;
+
+        if (mask[gid])
+        {
+            pos_t first = edges[gid];
+            pos_t last = (gid + 1 < nodes_amount) ? edges[gid + 1] : edges_amount;
+
+            mask[gid] = M_MASK_FALSE;
+
+            for (pos_t i = first; i < last; i++)
+            {
+                pos_t nid = destinations[i];
+
+                if(cost[nid] > cost[gid] + weights[i])
+                {
+                    weight_t new_cost = cost[gid] + weights[i];
+
+                    atomicMin(&cost[nid], new_cost);
+
+                    if (cost[nid] == new_cost)
+                    {
+                        previous_node[nid] = gid;
+                        mask[nid] = M_MASK_TRUE;
+                    }
+                }
+            }
+        }
+    }
+
     __device__ void selection_sort( int *data, int left, int right )
     {
         for( int i = left ; i <= right ; ++i ){
