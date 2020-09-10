@@ -1,6 +1,3 @@
-# Group2_GPU_CA_SS2020
-Next meeting 17.4.2020
+# Single Source Shortest Path Algorithm
 
-Thorsten: IO
-Simon: Graph Generation
-Lucas: Graph connect test
+Sequential and several parallel implementations of Djikstra's algorithm for the GPU Archictectures course utilising different CUDA features.
